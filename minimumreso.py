@@ -1060,11 +1060,11 @@ class normal_centroid_experiment:
         self.seedlist=unit_seedlist
         self.sitelist=unit_sitelist
 
-    def get_pol_centroid(self,exp):
+    def get_pol_centroid(self):
         polcentroidlist = []
         for i in range(len(self.seedlist)):
             polcentroidlist.append(get_point_polony(self.seedlist[i], self.seedlist[i]))
-        exp.polcentroidlist = polcentroidlist
+        self.polcentroidlist = polcentroidlist
 
 
 
@@ -1103,9 +1103,9 @@ class normal_centroid_experiment:
         springkernels = []
         tuttekernels = []
         for i in range(len(self.seedlist)):
-            springkernels.append(st.gaussian_kde(np.stack([self.spring_centroidlist[i][:, 0], self.spring_centroidlist[i][:, 1]])))
+            springkernels.append(st.gaussian_kde(np.stack([np.array(self.spring_centroidlist[i])[:, 0], np.array(self.spring_centroidlist[i])[:, 1]])))
         for i in range(len(self.seedlist)):
-            tuttekernels.append(st.gaussian_kde(np.stack([self.tutte_centroidlist[i][:, 0], self.tutte_centroidlist[i][:, 1]])))
+            tuttekernels.append(st.gaussian_kde(np.stack([np.array(self.tutte_centroidlist[i])[:, 0], np.array(self.tutte_centroidlist[i])[:, 1]])))
         self.spring_kernellist=springkernels
         self.tutte_kernellist=tuttekernels
         return springkernels, tuttekernels
