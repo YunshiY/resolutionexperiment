@@ -1235,20 +1235,20 @@ class normal_centroid_experiment:
         master_directory = parsift_lib.prefix(tittle)
         tutte_merge_list=[]
         spring_merge_list=[]
-        for i in range(int(np.floor((self.max-self.min)/self.step)-1)):
-            tutte_merge_list.append(np.concatenate(self.tutte_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat]),axis=None)
-        for i in range(int(np.floor((self.max-self.min)/self.step)-1)):
-            spring_merge_list.append(np.concatenate(self.spring_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat]),axis=None)
+        for i in range(int(np.floor((self.max-self.min)/self.step))):
+            tutte_merge_list.append(np.concatenate(self.tutte_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat],axis=None))
+        for i in range(int(np.floor((self.max-self.min)/self.step))):
+            spring_merge_list.append(np.concatenate(self.spring_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat],axis=None))
 
 
         for i in range(len(tutte_merge_list)):
             plt.hist(tutte_merge_list[i], alpha=0.5, label='%s' % i)
 
-        plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
+            plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
         plt.close()
         for i in range(len(spring_merge_list)):
             plt.hist(spring_merge_list[i], alpha=0.5, label='%s' % i)
-        plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
+            plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
         plt.close()
 
 def run_analysis_experiemnt(analyze_object):
