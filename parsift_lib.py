@@ -71,10 +71,7 @@ class Surface:
             if point[0]**2 + point[1]**2 <= self.roi_radius ** 2:  # then the point is inside the circle
                 self.site_coordinates = np.append(self.site_coordinates, [point], axis=0)
         self.nsites = len(self.site_coordinates)
-        self.grid_unitcircle=np.zeros((len(self.site_coordinates),2))
-        for i in self.site_coordinates:
-            self.grid_unitcircle[i][0]=i[0]/self.grid_radius
-            self.grid_unitcircle[i][1]=i[1]/self.grid_radius
+
 
 
         # ipdb.set_trace()
