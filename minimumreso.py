@@ -1132,7 +1132,7 @@ class normal_centroid_experiment:
             surf = ax.plot_surface(xx, yy, z, rstride=1, cstride=1, cmap='coolwarm', edgecolor='none')
 
             x = fig.colorbar(surf, shrink=0.5, aspect=5)
-            x.set_label('%s' % self.polony_counts[i] + 'polonies')
+            x.set_label('%s' % counter + 'polonies')
             counter+=1
 
 
