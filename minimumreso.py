@@ -569,7 +569,7 @@ class polony_number_resolution_minimum:
         tutteponolylist=[]
         spring_adjusted=[]
         tutte_adjusted=[]
-        
+
         for i in range(0, number_of_steps * repeats_per_step):
 
             npolony = min + i / repeats_per_step * step
@@ -1045,14 +1045,18 @@ def test_kernel_error_fit_plot(seedlist,k):
 class normal_centroid_experiment:
     def __init__(self,exp):
         self.__dict__.update(exp.__dict__)
-
-    def normal_coord(self, normallist):
+    def normalfactor(self):
+        normalfactor=[]
+        for i in range(len(self.polony_counts)):
+            normalfactor.append(np.ceil(max(self.sitelist[i][:,0])))
+        self.normalfactor=normalfactor
+    def normal_coord(self):
         unit_seedlist = []
         for i in range(len(self.seedlist)):
-            unit_seedlist.append(self.seedlist[i] / normallist[i])
+            unit_seedlist.append(self.seedlist[i] / self.normalfactor[i])
         unit_sitelist = []
         for i in range(len(self.sitelist)):
-            unit_sitelist.append(self.sitelist[i] / normallist[i])
+            unit_sitelist.append(self.sitelist[i] / self.normalfactor[i])
         self.seedlist=unit_seedlist
         self.sitelist=unit_sitelist
 
