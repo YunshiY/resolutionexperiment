@@ -1235,9 +1235,9 @@ class normal_centroid_experiment:
         master_directory = parsift_lib.prefix(tittle)
         tutte_merge_list=[]
         spring_merge_list=[]
-        for i in range(np.floor((self.max-self.min)/self.step)-1):
+        for i in range(int(np.floor((self.max-self.min)/self.step)-1)):
             tutte_merge_list.append(np.concatenate(self.tutte_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat]),axis=None)
-        for i in range(np.floor((self.max-self.min)/self.step)-1):
+        for i in range(int(np.floor((self.max-self.min)/self.step)-1)):
             spring_merge_list.append(np.concatenate(self.spring_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat]),axis=None)
 
 
