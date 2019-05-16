@@ -1113,7 +1113,7 @@ class normal_centroid_experiment:
 
 
 
-    def test_kernel_list_error_fit_plot(self, kernelist):
+    def test_kernel_list_error_fit_plot(self):
         xx, yy = np.mgrid[(- 2):(+ 2):100j, (- 2):(+ 2):100j]
         plotset = np.vstack([xx.ravel(), yy.ravel()])
         fig = plt.figure(figsize=(13, 7))
@@ -1124,27 +1124,33 @@ class normal_centroid_experiment:
 
         ax.set_zlabel('PDF')
         ax.set_title('Tutte reconstruction Point distribution')
+        counter=0
         for i in self.tutte_kernellist:
             z = np.reshape(i(plotset).T, xx.shape)
-            z += i
+            z += counter
 
             surf = ax.plot_surface(xx, yy, z, rstride=1, cstride=1, cmap='coolwarm', edgecolor='none')
 
             x = fig.colorbar(surf, shrink=0.5, aspect=5)
             x.set_label('%s' % self.polony_counts[i] + 'polonies')
+            counter+=1
+
 
         plt.savefig('tutte_single_point.png')
         plt.show()
 
         plt.close()
+        counter=0
         for i in self.spring_kernellist:
+
             z = np.reshape(i(plotset).T, xx.shape)
-            z += i
+            z += counter
 
             surf = ax.plot_surface(xx, yy, z, rstride=1, cstride=1, cmap='coolwarm', edgecolor='none')
 
             x = fig.colorbar(surf, shrink=0.5, aspect=5)
             x.set_label('%s' % self.polony_counts[i] + 'polonies')
+            counter+=1
 
         plt.savefig('spring_single_point.png')
         plt.show()
@@ -1189,20 +1195,21 @@ class normal_centroid_experiment:
     def his2d_experiment(self):
         tittle = 'hist2d'
         master_directory = parsift_lib.prefix(tittle)
-
+        counter=0
         for i in self.tutte_centroid_corerror:
             i=np.array(i)
             plt.hist2d(i[:,0],i[:,1])
+            counter+=1
 
-
-            plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
+            plt.savefig(master_directory + '/' + '%s' % counter + 'tutte.png')
             plt.close()
+        counter=0
         for i in self.spring_centroid_corerror:
             i=np.array(i)
             plt.hist2d(i[:,0] ,
                        i[:,1])
-
-            plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
+            counter+=1
+            plt.savefig(master_directory + '/' + '%s' % counter + 'spring.png')
             plt.close()
 
     def his1d_experiment(self):
@@ -1210,17 +1217,54 @@ class normal_centroid_experiment:
         tittle = 'hist1d'
         master_directory = parsift_lib.prefix(tittle)
 
+
+
         for i in range(len(self.tutte_centroid_distance_error)):
             plt.hist(self.tutte_centroid_distance_error[i], alpha=0.5, label='%s' % i)
 
         plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
         plt.close()
-        for i in range(len(self.spring_centroid_dsitance_error)):
+        for i in range(len(self.spring_centroid_distance_error)):
             plt.hist(self.spring_centroid_distance_error[i], alpha=0.5, label='%s' % i)
         plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
         plt.close()
 
+    def his1d_experiment_repeat(self):
 
+        tittle = 'hist1d_repeat'
+        master_directory = parsift_lib.prefix(tittle)
+        tutte_merge_list=[]
+        spring_merge_list=[]
+        for i in range(np.floor((self.max-self.min)/self.step)-1):
+            tutte_merge_list.append(np.concatenate(self.tutte_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat]),axis=None)
+        for i in range(np.floor((self.max-self.min)/self.step)-1):
+            spring_merge_list.append(np.concatenate(self.spring_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat]),axis=None)
+
+
+        for i in range(len(tutte_merge_list)):
+            plt.hist(tutte_merge_list[i], alpha=0.5, label='%s' % i)
+
+        plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
+        plt.close()
+        for i in range(len(spring_merge_list)):
+            plt.hist(spring_merge_list[i], alpha=0.5, label='%s' % i)
+        plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
+        plt.close()
+
+def run_analysis_experiemnt(analyze_object):
+    analyze_object.normalfactor()
+    analyze_object.normal_coord()
+    analyze_object.get_pol_centroid()
+    analyze_object.list_centroid_error()
+    analyze_object.normal_centroid_error_list()
+    analyze_object.kernel_per_experiment()
+    analyze_object.test_kernel_list_error_fit_plot()
+    analyze_object.plot_centroid_error_scatter()
+    analyze_object.his2d_experiment()
+    analyze_object.his1d_experiment()
+    analyze_object.his1d_experiment_repeat()
+
+    
 def normal_coord(exp,normallist):
     unit_seedlist=[]
     for i in range(len(exp.seedlist)):
