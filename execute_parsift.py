@@ -61,7 +61,7 @@ class Experiment:
                                                                untethered_graph=self.basic_circle.untethered_graph,
                                                                rgb_stamp_catalog=self.basic_circle.rgb_stamp_catalog)
             totalpca_time0 = time.time()
-            self.totalpca_reconstruction.conduct_pca_peripheral(full_output=full_output, image_only=False)
+            self.totalpca_reconstruction.conduct_shortest_path_matrix(full_output=full_output, image_only=False)
             self.totalpca_time = time.time() - totalpca_time0
             self.totalpca_reconstruction.align(title='align_totalpca_points' + iterlabel, error_threshold=1, full_output=full_output)
             self.totalpca_reconstruction.get_delaunay_comparison(parsift_lib.positiondict_to_list(self.totalpca_reconstruction.reconstructed_pos)[0], self.basic_circle.untethered_graph)
@@ -115,16 +115,22 @@ class Experiment:
 
 
 #basic run with alignment
-def basic_single_experiment_with_alignment():
+def basic_single_experiment_with_alignment(target_nsites=1000,npolony=100):
     reload(parsift_lib)
+    start_t = time.time()
     basic_run = Experiment(directory_label='single')
-    basic_run.reconstruct(target_nsites=500, npolony=10, full_output=True, do_peripheral_pca=False, do_total_pca=True,
-                          do_spring=False, do_tutte=False)
-
-
-
-
-
+    basic_run.reconstruct(target_nsites=target_nsites, npolony=npolony, full_output=True, do_peripheral_pca=False, do_total_pca=False,
+                          do_spring=False, do_tutte=True)
+    run_time = time.time() - start_t
+    print run_time
+#
+# basic_single_experiment_with_alignment(target_nsites=200000,npolony=10000)
+# print '10000'
+#
+# basic_single_experiment_with_alignment(target_nsites=120000,npolony=12000)
+# print '12000'
+#
+# basic_single_experiment_with_alignment(target_nsites=140000,npolony=14000)
 
 
 
@@ -132,12 +138,12 @@ def basic_single_experiment_with_alignment():
 
 def polony_number_variation_experiment():
     min = 10
-    max = 750
-    step = 50
+    max = 2000
+    step = 10
     title = 'polony_variation'
     repeats_per_step = 1
 
-    reload(litesim)
+    reload(parsift_lib)
     master_directory = parsift_lib.prefix(title)
     number_of_steps = (max - min) / step
     polony_counts = np.zeros((number_of_steps * repeats_per_step))
@@ -175,47 +181,73 @@ def polony_number_variation_experiment():
 
             basic_run = Experiment(directory_label='single')
             basic_run.reconstruct(target_nsites=nsites, npolony=npolony,randomseed=i % repeats_per_step,filename='monalisacolor.png', master_directory=master_directory,
-                                                iterlabel=str(npolony), full_output=False, do_peripheral_pca=True, do_total_pca=True,
-                          do_spring=True, do_tutte=True)
+                                                iterlabel=str(npolony), full_output=False, do_peripheral_pca=False, do_total_pca=False,
+                          do_spring=False, do_tutte=True)
 
-            master_errors_peripheralpca[i] = basic_run.peripheralpca_err
-            master_errors_totalpca[i] = basic_run.totalpca_err
-            master_errors_spring[i] = basic_run.spring_err
-            master_errors_tutte[i] = basic_run.tutte_err
+            try:
+                master_errors_peripheralpca[i] = basic_run.peripheralpca_err
+            except: pass
+            try:master_errors_totalpca[i] = basic_run.totalpca_err
+            except: pass
+            try:master_errors_spring[i] = basic_run.spring_err
+            except: pass
+            try:master_errors_tutte[i] = basic_run.tutte_err
+            except: pass
 
-            peripheralpca_run_times[i] = basic_run.peripheralpca_time
-            totalpca_run_times[i] = basic_run.totalpca_time
-            spring_run_times[i] = basic_run.springtime
-            tutte_run_times[i] = basic_run.tuttetime
-            face_enumeration_run_times[i] = basic_run.tutte_reconstruction.face_enumeration_runtime
+            try:peripheralpca_run_times[i] = basic_run.peripheralpca_time
+            except: pass
+            try:totalpca_run_times[i] = basic_run.totalpca_time
+            except: pass
+            try:spring_run_times[i] = basic_run.springtime
+            except: pass
+            try:tutte_run_times[i] = basic_run.tuttetime
+            except: pass
+            try:face_enumeration_run_times[i] = basic_run.tutte_reconstruction.face_enumeration_runtime
+            except: pass
 
-            master_levenshtein_peripheralpca[i] = basic_run.peripheralpca_reconstruction.levenshtein_distance
-            master_levenshtein_totalpca[i] = basic_run.totalpca_reconstruction.levenshtein_distance
-            master_levenshtein_spring[i] = basic_run.spring_reconstruction.levenshtein_distance
-            master_levenshtein_tutte[i] = basic_run.tutte_reconstruction.levenshtein_distance
+            try:master_levenshtein_peripheralpca[i] = basic_run.peripheralpca_reconstruction.levenshtein_distance
+            except: pass
+            try:master_levenshtein_totalpca[i] = basic_run.totalpca_reconstruction.levenshtein_distance
+            except: pass
+            try:master_levenshtein_spring[i] = basic_run.spring_reconstruction.levenshtein_distance
+            except: pass
+            try:master_levenshtein_tutte[i] = basic_run.tutte_reconstruction.levenshtein_distance
+            except: pass
             # ipdb.set_trace()
 
 
-            np.savetxt(master_directory + '/' + 'master_levenshtein_peripheralpca' + title + '.txt', zip(polony_counts, master_levenshtein_peripheralpca))
-            np.savetxt(master_directory + '/' + 'master_levenshtein_totalpca' + title + '.txt', zip(polony_counts, master_levenshtein_totalpca))
-            np.savetxt(master_directory + '/' + 'master_levenshtein_spring' + title + '.txt', zip(polony_counts, master_levenshtein_spring))
-            np.savetxt(master_directory + '/' + 'master_levenshtein_tutte' + title + '.txt', zip(polony_counts, master_levenshtein_tutte))
+            try:np.savetxt(master_directory + '/' + 'master_levenshtein_peripheralpca' + title + '.txt', zip(polony_counts, master_levenshtein_peripheralpca))
+            except: pass
+            try:np.savetxt(master_directory + '/' + 'master_levenshtein_totalpca' + title + '.txt', zip(polony_counts, master_levenshtein_totalpca))
+            except: pass
+            try:np.savetxt(master_directory + '/' + 'master_levenshtein_spring' + title + '.txt', zip(polony_counts, master_levenshtein_spring))
+            except: pass
+            try:np.savetxt(master_directory + '/' + 'master_levenshtein_tutte' + title + '.txt', zip(polony_counts, master_levenshtein_tutte))
+            except: pass
 
-            np.savetxt(master_directory + '/' + '0mastererrorsperipheralpca' + title + '.txt', zip(polony_counts, master_errors_peripheralpca))
-            np.savetxt(master_directory + '/' + '0mastererrorstotalpca' + title + '.txt', zip(polony_counts, master_errors_totalpca))
-            np.savetxt(master_directory + '/' + '0mastererrorsspring' + title + '.txt', zip(polony_counts, master_errors_spring))
-            np.savetxt(master_directory + '/' + '0mastererrorstutte' + title + '.txt', zip(polony_counts, master_errors_tutte))
+            try:np.savetxt(master_directory + '/' + '0mastererrorsperipheralpca' + title + '.txt', zip(polony_counts, master_errors_peripheralpca))
+            except: pass
+            try:np.savetxt(master_directory + '/' + '0mastererrorstotalpca' + title + '.txt', zip(polony_counts, master_errors_totalpca))
+            except: pass
+            try:np.savetxt(master_directory + '/' + '0mastererrorsspring' + title + '.txt', zip(polony_counts, master_errors_spring))
+            except: pass
+            try:np.savetxt(master_directory + '/' + '0mastererrorstutte' + title + '.txt', zip(polony_counts, master_errors_tutte))
+            except: pass
 
-            np.savetxt(master_directory + '/' + '1peripheralpca_runtimes_' + title + '.txt', zip(polony_counts, peripheralpca_run_times))
-            np.savetxt(master_directory + '/' + '1totalpca_runtimes_' + title + '.txt', zip(polony_counts, totalpca_run_times))
-            np.savetxt(master_directory + '/' + '1spring_runtimes_' + title + '.txt', zip(polony_counts, spring_run_times))
-            np.savetxt(master_directory + '/' + '1tutte_runtimes_' + title + '.txt', zip(polony_counts, tutte_run_times))
+            try:np.savetxt(master_directory + '/' + '1peripheralpca_runtimes_' + title + '.txt', zip(polony_counts, peripheralpca_run_times))
+            except: pass
+            try:np.savetxt(master_directory + '/' + '1totalpca_runtimes_' + title + '.txt', zip(polony_counts, totalpca_run_times))
+            except: pass
+            try:np.savetxt(master_directory + '/' + '1spring_runtimes_' + title + '.txt', zip(polony_counts, spring_run_times))
+            except: pass
+            try:np.savetxt(master_directory + '/' + '1tutte_runtimes_' + title + '.txt', zip(polony_counts, tutte_run_times))
+            except: pass
 
-            np.savetxt(master_directory + '/' + '1face_enumeration_runtimes_' + title + '.txt', zip(polony_counts, face_enumeration_run_times))
-
+            try:np.savetxt(master_directory + '/' + '1face_enumeration_runtimes_' + title + '.txt', zip(polony_counts, face_enumeration_run_times))
+            except: pass
         except:
             print 'ERROR'
-            ipdb.set_trace()
+            # ipdb.set_trace()
             pass
 
     timeout = 3

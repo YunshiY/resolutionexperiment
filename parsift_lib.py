@@ -71,15 +71,11 @@ class Surface:
             if point[0]**2 + point[1]**2 <= self.roi_radius ** 2:  # then the point is inside the circle
                 self.site_coordinates = np.append(self.site_coordinates, [point], axis=0)
         self.nsites = len(self.site_coordinates)
-
-
-
         # ipdb.set_trace()
         # merge = np.vstack((lattice_sites_a, lattice_sites_b))
 
     def plot_sites(self):
         plt.scatter(self.site_coordinates[:, 0], self.site_coordinates[:, 1])
-
         plt.show()
 
 
@@ -225,7 +221,7 @@ class Surface:
             plt.savefig(self.directory_name+'/'+'polony.svg')
             plt.savefig(self.directory_name + '/' + 'polony.png')
             plt.close()
-            print 'p2 is sequence, p2_secd,p2_prim are indexes, cheating sheet saves index hybrid'
+            # print 'p2 is sequence, p2_secd,p2_prim are indexes, cheating sheet saves index hybrid'
 
             plt.triplot(self.corseed[:,0],self.corseed[:,1],self.triangulated_delaunay.simplices.copy())
             plt.plot(self.corseed[:,0],self.corseed[:,1],'o')
@@ -235,6 +231,7 @@ class Surface:
             plt.savefig(self.directory_name + '/' +'delaunay_polony.svg')
             plt.savefig(self.directory_name + '/' + 'delaunay_polony.png')
             plt.close()
+        print 'end of crosslink polonies'
 
             # return p2, p2_secondary, p2_proxm, bc_index_pair, tri, rgb_stamp_catalog
 
@@ -288,7 +285,7 @@ class Reconstruction:
         # self.reconstructed_points = np.array(convert_dict_to_list(self.reconstructed_pos))
         self.rgb_stamp_catalog = (self.rgb_stamp_catalog)
         maxima = np.max(self.rgb_stamp_catalog)
-        self.rgb_stamp_catalog = self.rgb_stamp_catalog / maxima
+        self.rgb_stamp_catalog = self.rgb_stamp_catalog #/ maxima
         if full_output == True or image_only == True:
             plt.figure()
             plt.axis('off')
@@ -338,7 +335,7 @@ class Reconstruction:
         # self.distance_matrix = np.zeros((self.npolony,len(self.peripheral_nodes)), dtype=int)
         csr_graph = csr_matrix(nx.adjacency_matrix(self.untethered_graph))
         self.distance_matrix = np.array(floyd_warshall(csgraph=csr_graph, directed=False, return_predecessors=True))[0]
-        self.size_matrix = np.zeros((self.npolony,len(self.peripheral_nodes)), dtype=int)
+        # self.size_matrix = np.zeros((self.npolony,len(self.peripheral_nodes)), dtype=int)
         #
         # for node in self.untethered_graph.nodes:
         #     peripheral_node_count = 0
@@ -348,11 +345,12 @@ class Reconstruction:
         #         shortest_paths = [p for p in nx.algorithms.shortest_paths.generic.all_shortest_paths(self.untethered_graph,source=node,target=peripheral_node)]
         #         self.distance_matrix[node,peripheral_node_count] = len(shortest_paths[0])
         #         peripheral_node_count += 1
-        ipdb.set_trace()
+        # ipdb.set_trace()
         pca = PCA(n_components = 2)
         principal_components = pca.fit_transform(self.distance_matrix)
         self.reconstructed_pos = dict(zip(self.untethered_graph.nodes, tuple(principal_components)))
         self.reconstructed_points = np.array(principal_components)
+        self. reconstructed_points = self.reconstructed_points / np.max(np.sqrt(self.reconstructed_points ** 2))
 
 
 
@@ -399,11 +397,11 @@ class Reconstruction:
         # metrics are removed however
         if (planarity.is_planar(self.ideal_graph))==True and nx.is_connected(self.ideal_graph)==True:
             if full_output == True:
-                ideal_faces = self.planar_embedding_draw(self.ideal_graph,title='ideal')
+                ideal_faces = self.fast_planar_embedding(self.ideal_graph,title='ideal')
                 plt.autoscale(enable=True, axis='both', tight=None)
                 plt.savefig(self.directory_name + '/' + 'ideal_planar.png')
             else:
-                ideal_faces = self.planar_embedding_draw(self.ideal_graph, title='ideal',full_output=False)
+                ideal_faces = self.fast_planar_embedding(self.ideal_graph, title='ideal',full_output=False)
         else:
             print 'error, graph not fully connected, planarity test failed'
             ipdb.set_trace()
@@ -493,9 +491,13 @@ class Reconstruction:
         ###########
         # self.untethered_graph.add_edges_from(triangulation_fix(faces,reconstructed_pos))
 
+
         self.updated_reconstructed_pos = self.tutte_embedding(self.untethered_graph, self.max_face)
         if full_output == True or image_only == True:
-            nx.draw_networkx(self.untethered_graph, self.updated_reconstructed_pos, node_color='r', node_size=25)
+            # nx.draw_networkx(self.untethered_graph, self.updated_reconstructed_pos, node_color='r', node_size=25)
+            nx.draw_networkx_edges(self.untethered_graph, self.updated_reconstructed_pos, alpha=0.3)
+            nx.draw_networkx_labels(self.untethered_graph, self.updated_reconstructed_pos, font_family='Times', font_size=6, alpha=0.5)
+            # plt.autoscale(enable=True, axis='both', tight=None)
             plt.xlim(-1.1, 1.1)
             plt.ylim(-1.1, 1.1)
             plt.savefig(self.directory_name + '/' + 'samseq_tutte_embedding.svg')
@@ -758,6 +760,7 @@ class Reconstruction:
             # print        "END OF common face insertion block"
         # print 'END of vline loop'
         if full_output==True: 'End of Face Enumeration'
+        ipdb.set_trace()
         return face_edge_list
 
 
@@ -771,93 +774,148 @@ class Reconstruction:
         ys = []
         all_vlines = []
         xmax=0
-        for node, data in hgraph.nodes(data=True):
-            y = data['pos']
-            xb = data['start']
-            xe = data['end']
-            x = int((xe+xb)/2)
-            node_labels[node] = (x, y)
-            patches += [Circle((x, y), 0.25)]#,0.5,fc='w')]
-            xs.extend([xb, xe])
-            ys.append(y)
-            plt.hlines([y], [xb], [xe])
-        edgelist = list(hgraph.edges(data=True)) #only
-
-        for i in range(0,len(edgelist)):
-            #print i
-            data = edgelist[i][2]
-            x = data['pos']
-            if x > xmax: xmax = x
-            yb = data['start']
-            ye = data['end']
-            ys.extend([yb, ye])
-            xs.append(x)
-            all_vlines += [[x, yb,ye]]
-            plt.vlines([x], [yb], [ye])
-        # labels
-        if labels:
-            for n, (x, y) in node_labels.items():
-                plt.text(x, y, n,
-                         horizontalalignment='center',
-                         verticalalignment='center',
-                         bbox = dict(boxstyle='round',
-                                     ec=(0.0, 0.0, 0.0),
-                                     fc=(1.0, 1.0, 1.0),
-                                     )
-                         )
-        p = PatchCollection(patches)
-        if full_output == True:
-            ax = plt.gca()
-            ax.add_collection(p)
-            plt.axis('equal')
-            plt.xlim(min(xs)-1, max(xs)+1)
-            plt.ylim(min(ys)-1, max(ys)+1)
-            plt.savefig(self.directory_name + '/' +'planar_embedding_diagram'+title+'.svg')
-            plt.savefig(self.directory_name + '/' + 'planar_embedding_diagram' + title + '.png')
-            plt.close()
-        xmax += 1
-        enumerated_faces = []
-        vsizes_enumerated_faces = []
-        for vline in range(0,len(all_vlines)):
-            if full_output == True: print vline
-            #find closest interesting vline for top part, and bottom part resp.
-            minimum_positive_distance = 999999999999
-            edge_candidate_positive = []
-            minimum_negative_distance = -999999999999
-            edge_candidate_negative = []
-            edge_candidate_primary = [edgelist[vline][0],edgelist[vline][1],edgelist[vline][2]['pos']]
-            #intersectability - we create an intersectors group,
-            #ie the set of vlines that have vertical overlap with our current vline
-            #start by making an empty intersectors list that we will add to below.
-            # ultimately all we want from these are the minima, the vlines closest to our vline with the potential to ...
-            # ...intersect, these will be the starts of faces
-            #note that each intersector has two associated lateral distances, from left and right, negative and positive
-            #this means we enforce a periodic boundary condition, so in the case of othervline being to the right of vline,
-            #then we would add the distance from the leftmost edge to vline with the distance from rightmost edge to other_vline
-            intersectors = [[],[],[]] #[[identifying index of other_vline],[distance btw vline and other_vline to the left],[" for distance via the right]]
+        ordered_neighbor_lists = [None]*graph.number_of_nodes()
+        for node in graph.nodes():
+            # ordered_clockwise_neighbors = []
+            upper_neighbors = []
+            lower_neighbors = []
+            upper_neighbor_positions = []
+            lower_neighbor_positions = []
+            neighbors = graph[node]
+            position_of_this_node = hgraph.nodes(data=False)[node]['pos']
+            for neighbor in neighbors:
+                position_of_this_neighbor = hgraph.nodes(data=False)[neighbor]['pos']
+                if position_of_this_neighbor > position_of_this_node:
+                    upper_neighbors.append(neighbor)
+                    upper_neighbor_positions.append(hgraph.edges(data=False)[(node, neighbor)]['pos'])
+                else:
+                    lower_neighbors.append(neighbor)
+                    lower_neighbor_positions.append(hgraph.edges(data=False)[(node, neighbor)]['pos'])
+            upper_neighbors_sorted = [x for _,x in sorted(zip(upper_neighbor_positions, upper_neighbors))]
+            lower_neighbors_sorted = [x for _, x in sorted(zip(lower_neighbor_positions, lower_neighbors))]
+            ordered_neighbor_lists[node] = upper_neighbors_sorted[::-1] + lower_neighbors_sorted
+        edge_list_ordered_pairs = []
+        for edge in graph.edges():
+            edge_list_ordered_pairs.append([edge[0], edge[1]])
+            edge_list_ordered_pairs.append([edge[1], edge[0]])
+        face_list = []
+        while edge_list_ordered_pairs:
+            arbitrary_edge = edge_list_ordered_pairs[0]
             # ipdb.set_trace()
-            for other_vline in range(0, len(all_vlines)):
-                #check vertical intersectability
-                if all_vlines[vline][1] >= all_vlines[other_vline][2] or all_vlines[vline][2] <= all_vlines[other_vline][1] or all_vlines[vline][0] == all_vlines[other_vline][0]:
-                    pass
-                else: #if vertical overlap exists, then we need to add the other_vline to the list of intersectors of vline
-                    intersectors[0] += [other_vline]
-                    distance_to_right = (all_vlines[vline][0] - all_vlines[other_vline][0])%xmax
-                    distance_to_left = (all_vlines[other_vline][0] - all_vlines[vline][0])%xmax
-                    intersectors[2] += [distance_to_left]
-                    intersectors[1] += [distance_to_right]
-            closest_to_left = intersectors[0][np.argmin(intersectors[1])]
-            partial_face_to_left = [closest_to_left,vline]
-            partial_face_to_left_vsize = [all_vlines[closest_to_left][2]-all_vlines[closest_to_left][1],all_vlines[vline][2]-all_vlines[vline][1]]
-            closest_to_right = intersectors[0][np.argmin(intersectors[2])]
-            partial_face_to_right = [vline,closest_to_right]
-            partial_face_to_right_vsize = [all_vlines[vline][2]-all_vlines[vline][1],all_vlines[closest_to_right][2]-all_vlines[closest_to_right][1]]
-            enumerated_faces,vsizes_enumerated_faces = self.update_enumerated_faces(enumerated_faces, vsizes_enumerated_faces, partial_face_to_left, partial_face_to_left_vsize, all_vlines, edgelist,full_output=full_output)
-            enumerated_faces,vsizes_enumerated_faces = self.update_enumerated_faces(enumerated_faces, vsizes_enumerated_faces, partial_face_to_right, partial_face_to_right_vsize, all_vlines,edgelist,full_output=full_output)
-            face_edge_list = convert_vlines_to_edges(enumerated_faces,edgelist)
-            # print        "END OF common face insertion block"
-        # print 'END of vline loop'
-        if full_output==True: 'End of Face Enumeration'
+            vv = arbitrary_edge[1]
+            uu = arbitrary_edge[0]
+            u_0 = arbitrary_edge[0]
+            face = [uu]
+            edge_list_ordered_pairs.remove(arbitrary_edge)
+            while vv != u_0:
+                face.append(vv)
+                nbrs_v = ordered_neighbor_lists[vv]
+                # ipdb.set_trace()
+                index_of_uu = nbrs_v.index(uu)
+                index_of_ww = index_of_uu + 1 #ww is the clockwise successor of uu
+                ww = nbrs_v[index_of_ww%len(nbrs_v)]
+                edge_list_ordered_pairs.remove([vv,ww])
+                uu = vv
+                vv = ww
+            face_list.append(face)
+        face_edge_list = []
+        for face in face_list:
+            converted_face = []
+            for vertex in range(len(face)):
+                successor = (vertex+1)%len(face)
+                edge_to_add = (face[vertex],face[successor])
+                converted_face.append(edge_to_add)
+            face_edge_list.append(converted_face)
+        # ipdb.set_trace()
+
+        # for node, data in hgraph.nodes(data=True):
+        #     y = data['pos']
+        #     xb = data['start']
+        #     xe = data['end']
+        #     x = int((xe+xb)/2)
+        #     node_labels[node] = (x, y)
+        #     patches += [Circle((x, y), 0.25)]#,0.5,fc='w')]
+        #     xs.extend([xb, xe])
+        #     ys.append(y)
+        #     plt.hlines([y], [xb], [xe])
+        # edgelist = list(hgraph.edges(data=True)) #only
+        #
+        #
+        # for i in range(0,len(edgelist)):
+        #     #print i
+        #     data = edgelist[i][2]
+        #     x = data['pos']
+        #     if x > xmax: xmax = x
+        #     yb = data['start']
+        #     ye = data['end']
+        #     ys.extend([yb, ye])
+        #     xs.append(x)
+        #     all_vlines += [[x, yb,ye]]
+        #     plt.vlines([x], [yb], [ye])
+        # # labels
+        # if labels:
+        #     for n, (x, y) in node_labels.items():
+        #         plt.text(x, y, n,
+        #                  horizontalalignment='center',
+        #                  verticalalignment='center',
+        #                  bbox = dict(boxstyle='round',
+        #                              ec=(0.0, 0.0, 0.0),
+        #                              fc=(1.0, 1.0, 1.0),
+        #                              )
+        #                  )
+        # p = PatchCollection(patches)
+        # if full_output == True:
+        #     ax = plt.gca()
+        #     ax.add_collection(p)
+        #     plt.axis('equal')
+        #     plt.xlim(min(xs)-1, max(xs)+1)
+        #     plt.ylim(min(ys)-1, max(ys)+1)
+        #     plt.savefig(self.directory_name + '/' +'planar_embedding_diagram'+title+'.svg')
+        #     plt.savefig(self.directory_name + '/' + 'planar_embedding_diagram' + title + '.png')
+        #     plt.close()
+        # xmax += 1
+        # enumerated_faces = []
+        # vsizes_enumerated_faces = []
+        # for vline in range(0,len(all_vlines)):
+        #     if full_output == True: print vline
+        #     #find closest interesting vline for top part, and bottom part resp.
+        #     minimum_positive_distance = 999999999999
+        #     edge_candidate_positive = []
+        #     minimum_negative_distance = -999999999999
+        #     edge_candidate_negative = []
+        #     edge_candidate_primary = [edgelist[vline][0],edgelist[vline][1],edgelist[vline][2]['pos']]
+        #     #intersectability - we create an intersectors group,
+        #     #ie the set of vlines that have vertical overlap with our current vline
+        #     #start by making an empty intersectors list that we will add to below.
+        #     # ultimately all we want from these are the minima, the vlines closest to our vline with the potential to ...
+        #     # ...intersect, these will be the starts of faces
+        #     #note that each intersector has two associated lateral distances, from left and right, negative and positive
+        #     #this means we enforce a periodic boundary condition, so in the case of othervline being to the right of vline,
+        #     #then we would add the distance from the leftmost edge to vline with the distance from rightmost edge to other_vline
+        #     intersectors = [[],[],[]] #[[identifying index of other_vline],[distance btw vline and other_vline to the left],[" for distance via the right]]
+        #     # ipdb.set_trace()
+        #     for other_vline in range(0, len(all_vlines)):
+        #         #check vertical intersectability
+        #         if all_vlines[vline][1] >= all_vlines[other_vline][2] or all_vlines[vline][2] <= all_vlines[other_vline][1] or all_vlines[vline][0] == all_vlines[other_vline][0]:
+        #             pass
+        #         else: #if vertical overlap exists, then we need to add the other_vline to the list of intersectors of vline
+        #             intersectors[0] += [other_vline]
+        #             distance_to_right = (all_vlines[vline][0] - all_vlines[other_vline][0])%xmax
+        #             distance_to_left = (all_vlines[other_vline][0] - all_vlines[vline][0])%xmax
+        #             intersectors[2] += [distance_to_left]
+        #             intersectors[1] += [distance_to_right]
+        #     closest_to_left = intersectors[0][np.argmin(intersectors[1])]
+        #     partial_face_to_left = [closest_to_left,vline]
+        #     partial_face_to_left_vsize = [all_vlines[closest_to_left][2]-all_vlines[closest_to_left][1],all_vlines[vline][2]-all_vlines[vline][1]]
+        #     closest_to_right = intersectors[0][np.argmin(intersectors[2])]
+        #     partial_face_to_right = [vline,closest_to_right]
+        #     partial_face_to_right_vsize = [all_vlines[vline][2]-all_vlines[vline][1],all_vlines[closest_to_right][2]-all_vlines[closest_to_right][1]]
+        #     enumerated_faces,vsizes_enumerated_faces = self.update_enumerated_faces(enumerated_faces, vsizes_enumerated_faces, partial_face_to_left, partial_face_to_left_vsize, all_vlines, edgelist,full_output=full_output)
+        #     enumerated_faces,vsizes_enumerated_faces = self.update_enumerated_faces(enumerated_faces, vsizes_enumerated_faces, partial_face_to_right, partial_face_to_right_vsize, all_vlines,edgelist,full_output=full_output)
+        #     face_edge_list = convert_vlines_to_edges(enumerated_faces,edgelist)
+        #     # print        "END OF common face insertion block"
+        # # print 'END of vline loop'
+        # if full_output==True: 'End of Face Enumeration'
         return face_edge_list
 
 

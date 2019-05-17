@@ -282,6 +282,8 @@ class Surface:
         ###########
         #self.untethered_graph.add_edges_from(triangulation_fix(faces,tutte_pos))
 
+
+
         self.updated_tutte_pos=self.tutte_embedding(self.untethered_graph,self.max_face)
         if full_output == True or image_only == True:
             nx.draw_networkx(self.untethered_graph, self.updated_tutte_pos,node_color='r',node_size=25)
