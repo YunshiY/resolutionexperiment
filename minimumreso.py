@@ -16,6 +16,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy import linalg as LA
 from scipy.stats import multivariate_normal
 import scipy.stats as st
+from scipy.optimize import curve_fit
+from scipy.stats import norm
+import matplotlib.mlab as mlab
+import seaborn as sns
+
 from execute_parsift import Experiment
 import statsmodels.api as sm
 
@@ -1220,36 +1225,85 @@ class normal_centroid_experiment:
 
 
         for i in range(len(self.tutte_centroid_distance_error)):
-            plt.hist(self.tutte_centroid_distance_error[i], alpha=0.5, label='%s' % i)
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(self.tutte_centroid_distance_error[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+        plt.legend(prop={'size': 16}, title = 'Polony number')
 
-        plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
+        plt.title('density plot of distance error from tutte reconstruction')
+        plt.savefig(master_directory + '/' + '%s' % i + 'tutte_distance_error.png')
+
         plt.close()
         for i in range(len(self.spring_centroid_distance_error)):
-            plt.hist(self.spring_centroid_distance_error[i], alpha=0.5, label='%s' % i)
-        plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(self.spring_centroid_distance_error[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number' + '%s' % counter))
+        plt.legend(prop={'size': 16}, title='Polony number')
+
+        plt.title('density plot of distance error from spring reconstruction')
+        plt.savefig(master_directory + '/' + '%s' % i + 'spring_distance_error.png')
+
         plt.close()
+
+
+
 
     def his1d_experiment_repeat(self):
 
-        tittle = 'hist1d_repeat'
-        master_directory = parsift_lib.prefix(tittle)
+        title = 'hist1d_repeat'
+        master_directory = parsift_lib.prefix(title)
         tutte_merge_list=[]
         spring_merge_list=[]
-        for i in range(int(np.floor((self.max-self.min)/self.step))):
+        for i in range(int(len(self.seedlist)/self.repeat)):
             tutte_merge_list.append(np.concatenate(self.tutte_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat],axis=None))
-        for i in range(int(np.floor((self.max-self.min)/self.step))):
+        for i in range(int(len(self.seedlist)/self.repeat)):
             spring_merge_list.append(np.concatenate(self.spring_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat],axis=None))
 
 
         for i in range(len(tutte_merge_list)):
-            plt.hist(tutte_merge_list[i], alpha=0.5, label='%s' % i)
+            counter=self.polony_counts[i*self.repeat]
 
+            n,bins,patches=plt.hist(tutte_merge_list[i], alpha=0.5, label=('%s' % i),normed=True)
+            mu,sigma=norm.fit(tutte_merge_list[i])
+            y=mlab.normpdf(bins,mu,sigma)
+            l=plt.plot(bins,y,'r--',linewidth=2)
+            plt.title('point distribution of distance error from tutte reconstruction of '+'%s'%counter+'polonies'+'\n fit by gaussian distribution')
+            plt.legend()
             plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
-        plt.close()
+
+            plt.close()
+        for i in range(len(tutte_merge_list)):
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(tutte_merge_list[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+
+            plt.title(
+                'distribution of distance error from tutte reconstruction of ' + '%s' % counter + 'polonies'+'\n fit by kernel density estimation')
+            plt.savefig(master_directory + '/' + '%s' % i + 'kernel_tutte.png')
+
+            plt.close()
         for i in range(len(spring_merge_list)):
-            plt.hist(spring_merge_list[i], alpha=0.5, label='%s' % i)
+            n,bins,pathces=plt.hist(spring_merge_list[i], alpha=0.5, label='%s' % i,normed=True)
+            mu, sigma = norm.fit(spring_merge_list[i])
+            y = mlab.normpdf(bins, mu, sigma)
+            l = plt.plot(bins, y, 'r--', linewidth=2)
+            plt.title('point distribution of distance error from spring reconstruction of '+'%s'%counter+'polonies'+'\n fit by guassian distribition')
             plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
-        plt.close()
+            plt.close()
+        for i in range(len(spring_merge_list)):
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(spring_merge_list[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+
+            plt.title(
+                'distribution of distance error from spring reconstruction of ' + '%s' % counter + 'polonies'+'\n fit by kernel density estimation')
+            plt.savefig(master_directory + '/' + '%s' % i + 'kernel_spring.png')
+
+            plt.close()
 
 def run_analysis_experiemnt(analyze_object):
     analyze_object.normalfactor()
@@ -1427,3 +1481,37 @@ def his1d_experiment(exp):
 
     plt.close()
 
+
+def his1d_experiment(f):
+
+        tittle = 'hist1d'
+        master_directory = parsift_lib.prefix(tittle)
+
+
+
+        for i in range(len(f.tutte_centroid_distance_error)):
+            counter = f.polony_counts[i * f.repeat]
+            sns.distplot(f.tutte_centroid_distance_error[i], hist=False, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+        plt.legend(prop={'size': 16}, title = 'Polony number')
+        plt.xlabel('Distance')
+        plt.ylabel('Density')
+
+        plt.title('density plot of distance error from tutte reconstruction')
+        plt.savefig(master_directory + '/' + '%s' % i + 'tutte_distance_error.png')
+
+        plt.close()
+        for i in range(len(f.spring_centroid_distance_error)):
+            counter = f.polony_counts[i * f.repeat]
+            sns.distplot(f.spring_centroid_distance_error[i], hist=False, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number' + '%s' % counter))
+        plt.legend(prop={'size': 16}, title='Polony number')
+        plt.xlabel('Distance')
+        plt.ylabel('Density')
+
+        plt.title('density plot of distance error from spring reconstruction')
+        plt.savefig(master_directory + '/' + '%s' % i + 'spring_distance_error.png')
+
+        plt.close()
