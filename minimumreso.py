@@ -20,6 +20,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import norm
 import matplotlib.mlab as mlab
 import seaborn as sns
+import pandas as pd
 
 from execute_parsift import Experiment
 import statsmodels.api as sm
@@ -574,7 +575,7 @@ class polony_number_resolution_minimum:
         tutteponolylist=[]
         spring_adjusted=[]
         tutte_adjusted=[]
-
+        simulationerror=[]
         for i in range(0, number_of_steps * repeats_per_step):
 
             npolony = min + i / repeats_per_step * step
@@ -591,9 +592,13 @@ class polony_number_resolution_minimum:
 
 
             self.basic_run = just_generate_data()
-            self.basic_run.experiment(nsites=nsites, npolony=npolony,
+            try:
+                self.basic_run.experiment(nsites=nsites, npolony=npolony,
                                       filename='monalisacolor.png', master_directory=master_directory,
                                       iterlabel=str(npolony), full_output=False)
+            except:
+                print 'simulation fail'
+                simulationerror.append(i)
 
 
             seedlist.append(self.basic_run.basic_circle.corseed)
@@ -1305,6 +1310,7 @@ class normal_centroid_experiment:
 
             plt.close()
 
+
 def run_analysis_experiemnt(analyze_object):
     analyze_object.normalfactor()
     analyze_object.normal_coord()
@@ -1314,9 +1320,253 @@ def run_analysis_experiemnt(analyze_object):
     analyze_object.kernel_per_experiment()
     analyze_object.test_kernel_list_error_fit_plot()
     analyze_object.plot_centroid_error_scatter()
-    analyze_object.his2d_experiment()
     analyze_object.his1d_experiment()
     analyze_object.his1d_experiment_repeat()
+
+class centroid_experiment:
+    def __init__(self,exp):
+        self.__dict__.update(exp.__dict__)
+
+
+    def get_pol_centroid(self):
+        polcentroidlist = []
+        for i in range(len(self.seedlist)):
+            polcentroidlist.append(get_point_polony(self.seedlist[i], self.seedlist[i]))
+        self.polcentroidlist = polcentroidlist
+
+
+
+    def list_centroid_error(self):
+        tutte_centroidlist = []
+        tutte_error = []
+        spring_error = []
+        spring_centroidlist = []
+        for i in range(len(self.seedlist)):
+            track_centroid = track_spot_centroid(self.polcentroidlist[i], self.seedlist[i], self.spring_adjusted_seed[i],
+                                                 self.tutte_adjusted_seed[i])
+            temp_error_tutte, tutte_temporarylist = track_centroid.tutte_centroid_error()
+            temp_error_spring, spring_temporarylist = track_centroid.spr_centroid_error()
+            tutte_centroidlist.append(tutte_temporarylist)
+            tutte_error.append(temp_error_tutte)
+            spring_error.append(temp_error_spring)
+            spring_centroidlist.append(spring_temporarylist)
+        self.spring_centroidlist = spring_centroidlist
+        self.spring_centroid_distance_error = spring_error
+        self.tutte_centroid_distance_error = tutte_error
+        self.tutte_centroidlist = tutte_centroidlist
+
+    def normal_centroid_error_list(self):
+        errorlist_spring = []
+
+        for i in range(len(self.spring_centroidlist)):
+            errorlist_spring.append(self.spring_centroidlist[i] - self.seedlist[i])
+        errorlist_tutte = []
+        for i in range(len(self.tutte_adjusted_seed)):
+            errorlist_tutte.append(self.tutte_centroidlist[i] - self.seedlist[i])
+        self.spring_centroid_corerror=errorlist_spring
+        self.tutte_centroid_corerror=errorlist_tutte
+
+
+    def kernel_per_experiment(self):
+        springkernels = []
+        tuttekernels = []
+        for i in range(len(self.seedlist)):
+            springkernels.append(st.gaussian_kde(np.stack([np.array(self.spring_centroidlist[i])[:, 0], np.array(self.spring_centroidlist[i])[:, 1]])))
+        for i in range(len(self.seedlist)):
+            tuttekernels.append(st.gaussian_kde(np.stack([np.array(self.tutte_centroidlist[i])[:, 0], np.array(self.tutte_centroidlist[i])[:, 1]])))
+        self.spring_kernellist=springkernels
+        self.tutte_kernellist=tuttekernels
+        return springkernels, tuttekernels
+
+
+
+
+    def test_kernel_list_error_fit_plot(self):
+        xx, yy = np.mgrid[(- 2):(+ 2):100j, (- 2):(+ 2):100j]
+        plotset = np.vstack([xx.ravel(), yy.ravel()])
+        fig = plt.figure(figsize=(13, 7))
+
+        ax = plt.axes(projection='3d')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+
+        ax.set_zlabel('PDF')
+        ax.set_title('Tutte reconstruction Point distribution')
+        counter=0
+        for i in self.tutte_kernellist:
+            z = np.reshape(i(plotset).T, xx.shape)
+            z += counter
+
+            surf = ax.plot_surface(xx, yy, z, rstride=1, cstride=1, cmap='coolwarm', edgecolor='none')
+
+            x = fig.colorbar(surf, shrink=0.5, aspect=5)
+            x.set_label('%s' % counter + 'polonies')
+            counter+=1
+
+
+        plt.savefig('tutte_single_point.png')
+        plt.show()
+
+        plt.close()
+        counter=0
+        for i in self.spring_kernellist:
+
+            z = np.reshape(i(plotset).T, xx.shape)
+            z += counter
+
+            surf = ax.plot_surface(xx, yy, z, rstride=1, cstride=1, cmap='coolwarm', edgecolor='none')
+
+            x = fig.colorbar(surf, shrink=0.5, aspect=5)
+            x.set_label('%s' % counter + 'polonies')
+            counter+=1
+
+        plt.savefig('spring_single_point.png')
+        plt.show()
+
+        plt.close()
+
+
+    def plot_centroid_error_scatter(self ):
+
+
+        fig = plt.figure(figsize=plt.figaspect(0.5))
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        for i in range(len(self.spring_centroid_corerror)):
+            color = [random.random(), random.random(), random.random()]
+
+            for spot in self.tutte_centroid_corerror[i]:
+                ax.scatter(spot[0],
+                           spot[1], self.polony_counts[i],
+                           color=color)
+        plt.title('Tutte reconstruction')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+
+        ax.set_zlabel('polony number')
+        ax = fig.add_subplot(1, 2, 2, projection='3d')
+
+        for i in range(len(self.spring_centroid_corerror)):
+            color = [random.random(), random.random(), random.random()]
+
+            for spot in self.spring_centroid_corerror[i]:
+                ax.scatter(spot[0],
+                           spot[1], self.polony_counts[i],
+                           color=color)
+        plt.title('Spring reoconstruction')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+
+        ax.set_zlabel('polony number')
+        plt.savefig('centroid_grid_size_error_new.png')
+        plt.close()
+
+    def his2d_experiment(self):
+        tittle = 'hist2d'
+        master_directory = parsift_lib.prefix(tittle)
+        counter=0
+        for i in self.tutte_centroid_corerror:
+            i=np.array(i)
+            plt.hist2d(i[:,0],i[:,1])
+            counter+=1
+
+            plt.savefig(master_directory + '/' + '%s' % counter + 'tutte.png')
+            plt.close()
+        counter=0
+        for i in self.spring_centroid_corerror:
+            i=np.array(i)
+            plt.hist2d(i[:,0] ,
+                       i[:,1])
+            counter+=1
+            plt.savefig(master_directory + '/' + '%s' % counter + 'spring.png')
+            plt.close()
+
+    def his1d_experiment(self):
+
+        tittle = 'hist1d'
+        master_directory = parsift_lib.prefix(tittle)
+
+
+
+        for i in range(len(self.tutte_centroid_distance_error)):
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(self.tutte_centroid_distance_error[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+        plt.legend(prop={'size': 16}, title = 'Polony number')
+
+        plt.title('density plot of distance error from tutte reconstruction')
+        plt.savefig(master_directory + '/' + '%s' % i + 'tutte_distance_error.png')
+
+        plt.close()
+        for i in range(len(self.spring_centroid_distance_error)):
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(self.spring_centroid_distance_error[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number' + '%s' % counter))
+        plt.legend(prop={'size': 16}, title='Polony number')
+
+        plt.title('density plot of distance error from spring reconstruction')
+        plt.savefig(master_directory + '/' + '%s' % i + 'spring_distance_error.png')
+
+        plt.close()
+
+
+
+
+    def his1d_experiment_repeat(self):
+
+        title = 'hist1d_repeat'
+        master_directory = parsift_lib.prefix(title)
+        tutte_merge_list=[]
+        spring_merge_list=[]
+        for i in range(int(len(self.seedlist)/self.repeat)):
+            tutte_merge_list.append(np.concatenate(self.tutte_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat],axis=None))
+        for i in range(int(len(self.seedlist)/self.repeat)):
+            spring_merge_list.append(np.concatenate(self.spring_centroid_distance_error[(i*self.repeat):(i+1)*self.repeat],axis=None))
+
+
+        for i in range(len(tutte_merge_list)):
+            counter=self.polony_counts[i*self.repeat]
+
+            n,bins,patches=plt.hist(tutte_merge_list[i], alpha=0.5, label=('%s' % i),normed=True)
+            mu,sigma=norm.fit(tutte_merge_list[i])
+            y=mlab.normpdf(bins,mu,sigma)
+            l=plt.plot(bins,y,'r--',linewidth=2)
+            plt.title('point distribution of distance error from tutte reconstruction of '+'%s'%counter+'polonies'+'\n fit by gaussian distribution')
+            plt.legend()
+            plt.savefig(master_directory + '/' + '%s' % i + 'tutte.png')
+
+            plt.close()
+        for i in range(len(tutte_merge_list)):
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(tutte_merge_list[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+
+            plt.title(
+                'distribution of distance error from tutte reconstruction of ' + '%s' % counter + 'polonies'+'\n fit by kernel density estimation')
+            plt.savefig(master_directory + '/' + '%s' % i + 'kernel_tutte.png')
+
+            plt.close()
+        for i in range(len(spring_merge_list)):
+            n,bins,pathces=plt.hist(spring_merge_list[i], alpha=0.5, label='%s' % i,normed=True)
+            mu, sigma = norm.fit(spring_merge_list[i])
+            y = mlab.normpdf(bins, mu, sigma)
+            l = plt.plot(bins, y, 'r--', linewidth=2)
+            plt.title('point distribution of distance error from spring reconstruction of '+'%s'%counter+'polonies'+'\n fit by guassian distribition')
+            plt.savefig(master_directory + '/' + '%s' % i + 'spring.png')
+            plt.close()
+        for i in range(len(spring_merge_list)):
+            counter = self.polony_counts[i * self.repeat]
+            sns.distplot(spring_merge_list[i], norm_hist=True, kde=True,
+                         kde_kws={'linewidth': 3},
+                         label=('ponoly number'+'%s'%counter))
+
+            plt.title(
+                'distribution of distance error from spring reconstruction of ' + '%s' % counter + 'polonies'+'\n fit by kernel density estimation')
+            plt.savefig(master_directory + '/' + '%s' % i + 'kernel_spring.png')
+
+            plt.close()
 
 
 def normal_coord(exp,normallist):
@@ -1514,4 +1764,35 @@ def his1d_experiment(f):
         plt.title('density plot of distance error from spring reconstruction')
         plt.savefig(master_directory + '/' + '%s' % i + 'spring_distance_error.png')
 
+        plt.close()
+
+def kernel_all_seed(analyze,n):
+    kernelspring=analyze.spring_kernellist[n]
+    kernel_tutte=analyze.tutte_kernellist[n]
+    seedori=analyze.polcentroidlist[n]
+    seedspring=analyze.spring_centroidlist[n]
+    seedtutte=analyze.tutte_centroidlist[n]
+    for i in seedori:
+        x,y=i[0]
+
+
+
+def plot_2d_kernel_densityplot(ana):
+    counter=0
+    for i in ana.spring_centroid_corerror:
+        df=pd.DataFrame(i,columns=['x','y'])
+        sns.jointplot(x='x',y='y',data=df,kind='kde')
+        num=int(ana.polony_counts[counter])
+        plt.title('%s'%num+'polonies')
+        plt.savefig('spring_relaxation'+'%s'%counter+'ponolies.png')
+        counter+=1
+        plt.close()
+    counter = 0
+    for i in ana.tutte_centroid_corerror:
+        df = pd.DataFrame(i, columns=['x', 'y'])
+        sns.jointplot(x='x', y='y', data=df, kind='kde')
+        num = int(ana.polony_counts[counter])
+        plt.title('%s' % num + 'polonies')
+        plt.savefig('tutte_embedding' + '%s' % counter + 'ponolies.png')
+        counter += 1
         plt.close()
