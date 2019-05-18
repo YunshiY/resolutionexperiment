@@ -596,52 +596,53 @@ class polony_number_resolution_minimum:
                 self.basic_run.experiment(nsites=nsites, npolony=npolony,
                                       filename='monalisacolor.png', master_directory=master_directory,
                                       iterlabel=str(npolony), full_output=False)
-            except:
-                print 'simulation fail'
-                simulationerror.append(i)
 
 
-            seedlist.append(self.basic_run.basic_circle.corseed)
-            sitelist.append(self.basic_run.basic_circle.site_coordinates)
+
+                seedlist.append(self.basic_run.basic_circle.corseed)
+                sitelist.append(self.basic_run.basic_circle.site_coordinates)
             #except:
              #   print 'ERROR'
                 # ipdb.set_trace()
               #  pass
 
-            samplespot = get_spot_polony(self.nspot, self.basic_run.basic_circle.site_coordinates,self.basic_run.basic_circle.corseed)
-            spot_ori_exact[i] = np.array([q[0] for q in samplespot])
+                samplespot = get_spot_polony(self.nspot, self.basic_run.basic_circle.site_coordinates,self.basic_run.basic_circle.corseed)
+                spot_ori_exact[i] = np.array([q[0] for q in samplespot])
 
 
-            exp_resolution = track_spot_centroid(samplespot,self.basic_run.basic_circle.corseed, self.basic_run.spring_reconstruction.reconstructed_points,self.basic_run.tutte_reconstruction.reconstructed_points)
-            master_tutte_centroid[i] = exp_resolution.tutte_centroid_error()[1]
-            master_spring_centroid[i] = exp_resolution.spr_centroid_error()[1]
+                exp_resolution = track_spot_centroid(samplespot,self.basic_run.basic_circle.corseed, self.basic_run.spring_reconstruction.reconstructed_points,self.basic_run.tutte_reconstruction.reconstructed_points)
+                master_tutte_centroid[i] = exp_resolution.tutte_centroid_error()[1]
+                master_spring_centroid[i] = exp_resolution.spr_centroid_error()[1]
 
-            mycross=make_cross(self.basic_run.basic_circle.site_coordinates,self.cross_layer)
-            cross_ori[i]=mycross
-            crosspol=track_spot_centroid(mycross,self.basic_run.basic_circle.corseed, self.basic_run.spring_reconstruction.reconstructed_points,self.basic_run.tutte_reconstruction.reconstructed_points)
-            cross_tutte_centroid[i]=crosspol.tutte_centroid_error()[1]
-            cross_spring_centroid[i]=crosspol.spr_centroid_error()[1]
+                mycross=make_cross(self.basic_run.basic_circle.site_coordinates,self.cross_layer)
+                cross_ori[i]=mycross
+                crosspol=track_spot_centroid(mycross,self.basic_run.basic_circle.corseed, self.basic_run.spring_reconstruction.reconstructed_points,self.basic_run.tutte_reconstruction.reconstructed_points)
+                cross_tutte_centroid[i]=crosspol.tutte_centroid_error()[1]
+                cross_spring_centroid[i]=crosspol.spr_centroid_error()[1]
                 # ipdb.set_trace()
-            springponolylist.append(self.basic_run.spring_reconstruction.reconstructed_points)
-            tutteponolylist.append(self.basic_run.tutte_reconstruction.reconstructed_points)
-            spring_adjusted.append(self.basic_run.spring_reconstruction.corseed_adjusted)
-            tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted
-            )
+                springponolylist.append(self.basic_run.spring_reconstruction.reconstructed_points)
+                tutteponolylist.append(self.basic_run.tutte_reconstruction.reconstructed_points)
+                spring_adjusted.append(self.basic_run.spring_reconstruction.corseed_adjusted)
+                tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted
+                )
 
 
-            np.savetxt(master_directory + '/' + '1peripheralpca_runtimes_' + title + '.txt',
+                np.savetxt(master_directory + '/' + '1peripheralpca_runtimes_' + title + '.txt',
                            zip(polony_counts, peripheralpca_run_times))
-            np.savetxt(master_directory + '/' + '1totalpca_runtimes_' + title + '.txt',
+                np.savetxt(master_directory + '/' + '1totalpca_runtimes_' + title + '.txt',
                            zip(polony_counts, totalpca_run_times))
 
-            np.savetxt(master_directory + '/' + '1spring_runtimes_' + title + '.txt',
+                np.savetxt(master_directory + '/' + '1spring_runtimes_' + title + '.txt',
                            zip(polony_counts, spring_run_times))
-            np.savetxt(master_directory + '/' + '1tutte_runtimes_' + title + '.txt',
+                np.savetxt(master_directory + '/' + '1tutte_runtimes_' + title + '.txt',
                            zip(polony_counts, tutte_run_times))
 
-            np.savetxt(master_directory + '/' + '1face_enumeration_runtimes_' + title + '.txt',
+                np.savetxt(master_directory + '/' + '1face_enumeration_runtimes_' + title + '.txt',
                            zip(polony_counts, face_enumeration_run_times))
 
+            except:
+                print 'simulation fail'
+                simulationerror.append(i)
         self.springallpolony=springponolylist
         self.tutteallponoly=tutteponolylist
         self.polony_counts = polony_counts
