@@ -656,6 +656,7 @@ class polony_number_resolution_minimum:
         self.seedlist=seedlist
         self.tutte_adjusted_seed=tutte_adjusted
         self.spring_adjusted_seed=spring_adjusted
+        self.simulationerror=simulationerror
         timeout = 3
         print 'cd to ' + master_directory + '? (Y/n)'
         rlist, _, _ = select([sys.stdin], [], [], timeout)
@@ -827,8 +828,8 @@ def extract_px_polony(exp,nl):
             ax.scatter(spot[0],
                    spot[1], exp.polony_counts[i],
                    color=color)
-        tuttelist.append(tutte_spot)
-        springlist.append(spring_spot)
+    tuttelist.append(tutte_spot)
+    springlist.append(spring_spot)
     plt.show()
 
     fig.savefig('cross.png')
@@ -1797,3 +1798,31 @@ def plot_2d_kernel_densityplot(ana):
         plt.savefig('tutte_embedding' + '%s' % counter + 'ponolies.png')
         counter += 1
         plt.close()
+
+
+def plot_2d_kernel_by_point(exp,nl):
+    tutte,spring,original=extract_adjusted_px_polony(exp,nl)
+    tutte=np.array(tutte)
+    spring=np.array(spring)
+    tutte_by_point=np.zeros((4*nl+1,len(tutte),2))
+    spring_by_point=np.zeros((4*nl+1,len(spring),2))
+
+    for i in range(4*nl+1):
+        tutte_by_point[i]=tutte[:,i,:]
+        spring_by_point[i]=spring[:,i,:]
+
+    for i in range(4*nl+1):
+        plt.subplot(4, 11, i+1)
+        tutte_df=pd.DataFrame(tutte_by_point[i],columns=['x','y'])
+        sns.jointplot(x='x',y='y',data=tutte_df,kind='kde')
+        plt.show()
+    plt.savefig('tutte.png')
+    plt.close()
+
+    for i in range(4*nl+1):
+        plt.subplot(4, 11, i+1)
+        tutte_df=pd.DataFrame(spring_by_point[i],columns=['x','y'])
+        sns.jointplot(x='x',y='y',data=tutte_df,kind='kde')
+    plt.savefig('spring.png')
+    plt.close()
+
