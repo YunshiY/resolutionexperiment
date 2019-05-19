@@ -1812,17 +1812,41 @@ def plot_2d_kernel_by_point(exp,nl):
         spring_by_point[i]=spring[:,i,:]
 
     for i in range(4*nl+1):
-        plt.subplot(4, 11, i+1)
+
         tutte_df=pd.DataFrame(tutte_by_point[i],columns=['x','y'])
         sns.jointplot(x='x',y='y',data=tutte_df,kind='kde')
-        plt.show()
-    plt.savefig('tutte.png')
-    plt.close()
+        plt.savefig('tutte'+'%s'%i+'.png')
+        plt.close()
 
     for i in range(4*nl+1):
-        plt.subplot(4, 11, i+1)
+
         tutte_df=pd.DataFrame(spring_by_point[i],columns=['x','y'])
         sns.jointplot(x='x',y='y',data=tutte_df,kind='kde')
-    plt.savefig('spring.png')
-    plt.close()
+        plt.savefig('spring'+'%s'%i+'.png')
+        plt.close()
+
+def plot_2d_kernel_by_point_unadjusted(exp,nl):
+    tutte,spring=extract_px_polony(exp,nl)
+    tutte=np.array(tutte)
+    spring=np.array(spring)
+    tutte_by_point=np.zeros((4*nl+1,len(tutte),2))
+    spring_by_point=np.zeros((4*nl+1,len(spring),2))
+
+    for i in range(4*nl+1):
+        tutte_by_point[i]=tutte[:,i,:]
+        spring_by_point[i]=spring[:,i,:]
+
+    for i in range(4*nl+1):
+
+        tutte_df=pd.DataFrame(tutte_by_point[i],columns=['x','y'])
+        sns.jointplot(x='x',y='y',data=tutte_df,kind='kde')
+        plt.savefig('unadjusted_tutte'+'%s'%i+'.png')
+        plt.close()
+
+    for i in range(4*nl+1):
+
+        tutte_df=pd.DataFrame(spring_by_point[i],columns=['x','y'])
+        sns.jointplot(x='x',y='y',data=tutte_df,kind='kde')
+        plt.savefig('unadjusted_spring'+'%s'%i+'.png')
+        plt.close()
 
