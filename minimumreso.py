@@ -1862,4 +1862,4 @@ def repeats_by_point(exp,nl):
     for i in range(4*nl+1):
         tutte_by_point[i]=tutte[:,i,:]
         spring_by_point[i]=spring[:,i,:]
-    return tutte_by_point,spring_by_point
+    return tutte_by_point,spring_by_point,original
