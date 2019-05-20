@@ -545,6 +545,7 @@ class polony_number_resolution_minimum:
         self.repeat=repeat
         self.cross_layer=nl
     def polony_number_variation_experiment(self):
+        print '###################%%%%%%%%%%%%%%%%%%%%%%%%%%%'
         min = self.min
         max =self.max
         step = self.step
@@ -571,8 +572,8 @@ class polony_number_resolution_minimum:
         face_enumeration_run_times = np.zeros((number_of_steps * repeats_per_step))
         seedlist=[]
         sitelist=[]
-        springponolylist=[]
-        tutteponolylist=[]
+        springpolonylist=[]
+        tuttepolonylist=[]
         spring_adjusted=[]
         tutte_adjusted=[]
         simulationerror=[]
@@ -643,8 +644,21 @@ class polony_number_resolution_minimum:
             except:
                 print 'simulation fail'
                 simulationerror.append(i)
-        self.springallpolony=springponolylist
-        self.tutteallponoly=tutteponolylist
+                try:
+                    seedlist[i]=[0]
+                except:
+                    seedlist.append([0])
+                try:
+                    sitelist[i] = [0]
+                except:
+                    sitelist.append([0])
+                springpolonylist.append([0])
+                tuttepolonylist.append([0])
+
+
+
+        self.springallpolony=springpolonylist
+        self.tutteallpolony=tuttepolonylist
         self.polony_counts = polony_counts
         self.spring_centroid = master_spring_centroid
         self.tutte_centroid = master_tutte_centroid
@@ -1865,16 +1879,19 @@ def repeats_by_point(exp,nl):
     return tutte_by_point,spring_by_point,original
 
 def extract2points(exp,points):
+    grid=np.array(exp.sitelist[0])
+    scale=max(grid[:,0])
+    points=scale*np.array(points)
     tuttelist=list()
     springlist=list()
     fig = plt.figure(figsize=plt.figaspect(0.5))
     ax = fig.add_subplot(1, 2, 1, projection='3d')
     original=list()
-    for i in range(len(points)):
+    for i in range(len(exp.seedlist)):
         id=get_point_polony(points,exp.seedlist[i])
         original.append(points)
         print id
-        estimation=track_spot_centroid(id,exp.seedlist[i],exp.spring_adjusted_seed[i],exp.tutte_adjusted_seed[i])
+        estimation=track_spot_centroid(id,exp.seedlist[i],exp.springallpolony,exp.tutteallpolony)
         tutte_error,tutte_spot=estimation.tutte_centroid_error()
         print tutte_spot
         color = [random.random(), random.random(), random.random()]
@@ -1888,10 +1905,10 @@ def extract2points(exp,points):
     ax.set_ylabel('y')
     ax.set_zlabel('polony number')
     ax = fig.add_subplot(1, 2, 2, projection='3d')
-    for i in range(len(points)):
+    for i in range(len(exp.seedlist)):
         id = get_point_polony(points, exp.seedlist[i])
         print id
-        estimation = track_spot_centroid(id, exp.seedlist[i], exp.spring_adjusted_seed[i], exp.tutte_adjusted_seed[i])
+        estimation = track_spot_centroid(id, exp.seedlist[i], exp.springallpolony[i], exp.tutteallpolony[i])
         spring_error, spring_spot = estimation.spr_centroid_error()
         color = [random.random(), random.random(), random.random()]
         for spot in spring_spot:
@@ -1912,3 +1929,57 @@ def extract2points(exp,points):
     plt.close()
 
     return tuttelist,springlist
+
+def repeat2points(exp,points):
+    tutte,spring=extract2points(exp,points)
+    tutte=np.array(tutte)
+    spring=np.array(spring)
+    tutte_by_point=np.zeros((2,len(tutte),2))
+    spring_by_point=np.zeros((2,len(spring),2))
+
+    for i in range(2):
+        tutte_by_point[i]=tutte[:,i,:]
+        spring_by_point[i]=spring[:,i,:]
+    return tutte_by_point,spring_by_point
+def draw_recon(exp):
+    pollist = np.zeros((len(exp.seedlist)))
+    for i in range(len(exp.seedlist)):
+        a = get_point_polony([[7, 0]], exp.seedlist[i])
+
+        pollist[i] = int(a[0][1])
+
+    for i in range(len(exp.springallpolony)):
+        plt.scatter(exp.springallpolony[i][int(pollist[i]), 0], exp.springallpolony[i][int(pollist[i]), 1])
+
+
+def coarse_adjustment(exp):
+    shift_vector=np.zeros((len(exp.seedlist),2))
+    scale=max(exp.sitelist[0][:,0])
+    for i in range(len(exp.seedlist)):
+        error=exp.springallpolony[i]-np.array(exp.seedlist[i])/scale
+        shift_vector[i]=[np.average(error[:,0]),np.average(error[:,1])]
+    print shift_vector
+    coarse_adjusted=[]
+    for i in range(len(exp.seedlist)):
+        coarse_adjusted.append(np.array(exp.springallpolony[i])-np.array(shift_vector[i]))
+    exp.spring_coarseadjsuted=coarse_adjusted
+def draw_recon2points(exp,points):
+    x = []
+    y = []
+    for j in points:
+        pollist = np.zeros((len(exp.springallpolony)))
+
+        for i in range(len(exp.seedlist)):
+            if len(exp.seedlist[i])>1:
+                a = get_point_polony([j], exp.seedlist[i])
+                pollist[i] = int(a[0][1])
+        print pollist
+        for i in range(len(exp.seedlist)):
+
+            if len(exp.seedlist[i])>1:
+                x.append(exp.springallpolony[i][int(pollist[i]),0])
+                y.append(exp.springallpolony[i][int(pollist[i]),1])
+    plt.hist2d(x,y)
+
+
+
