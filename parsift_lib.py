@@ -1042,7 +1042,7 @@ class Reconstruction:
             initialize = np.array([random.uniform(0.,6.3),random.uniform(-10, 10.),random.uniform(-10, 10.),random.uniform(0.,1)])
             res1 = scipy.optimize.basinhopping(func=evaluate_distortion,
                                               x0=initialize, T=0.1,
-                                              minimizer_kwargs={'args':([self.corseed, self.reconstructed_points, False,edge_number],)},
+                                              minimizer_kwargs={'args':([self.reconstructed_points,self.corseed,  False,edge_number],)},
                                               niter=1,
                                               disp=True,
                                               niter_success=50000,
@@ -1089,7 +1089,7 @@ class Reconstruction:
             minevals += 1
 
         xopt1 = res1['x']
-        error1, self.corseed_adjusted = evaluate_distortion(xopt1,args=[self.corseed, self.reconstructed_points,True,True,edge_number])
+        error1, self.corseed_adjusted = evaluate_distortion(xopt1,args=[self.reconstructed_points,self.corseed,True,True,edge_number])
 
         if full_output == True:
             plt.close()
