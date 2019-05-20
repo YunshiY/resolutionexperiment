@@ -1863,3 +1863,52 @@ def repeats_by_point(exp,nl):
         tutte_by_point[i]=tutte[:,i,:]
         spring_by_point[i]=spring[:,i,:]
     return tutte_by_point,spring_by_point,original
+
+def extract2points(exp,points):
+    tuttelist=list()
+    springlist=list()
+    fig = plt.figure(figsize=plt.figaspect(0.5))
+    ax = fig.add_subplot(1, 2, 1, projection='3d')
+    original=list()
+    for i in range(len(points)):
+        id=get_point_polony(points,exp.seedlist[i])
+        original.append(points)
+        print id
+        estimation=track_spot_centroid(id,exp.seedlist[i],exp.spring_adjusted_seed[i],exp.tutte_adjusted_seed[i])
+        tutte_error,tutte_spot=estimation.tutte_centroid_error()
+        print tutte_spot
+        color = [random.random(), random.random(), random.random()]
+        for spot in tutte_spot:
+            ax.scatter (spot[0],
+                    spot[1], exp.polony_counts[i],
+                   color=color)
+
+    plt.title('Tutte reconstruction')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('polony number')
+    ax = fig.add_subplot(1, 2, 2, projection='3d')
+    for i in range(len(points)):
+        id = get_point_polony(points, exp.seedlist[i])
+        print id
+        estimation = track_spot_centroid(id, exp.seedlist[i], exp.spring_adjusted_seed[i], exp.tutte_adjusted_seed[i])
+        spring_error, spring_spot = estimation.spr_centroid_error()
+        color = [random.random(), random.random(), random.random()]
+        for spot in spring_spot:
+
+            ax.scatter(spot[0],
+                   spot[1], exp.polony_counts[i],
+                   color=color)
+        tuttelist.append(tutte_spot)
+        springlist.append(spring_spot)
+    plt.title('Spring reoconstruction')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('polony number')
+
+    plt.show()
+
+    fig.savefig('cross.png')
+    plt.close()
+
+    return tuttelist,springlist
