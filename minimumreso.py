@@ -2033,7 +2033,7 @@ def draw_FWHM(dt,xmin,xmax):
     dt=np.sort(dt)
     kernel=st.gaussian_kde(dt)
     kyy=kernel(dt)
-    bin=len(dt)
+    bin=len(dt)/2
     p1=argrelmax(kyy[0:bin])[0][0]
     p2=bin+argrelmax(kyy[bin:len(dt)])[0][0]
     plt.vlines(x=dt[p1],ymin=0,ymax=1.5,colors='orange')
