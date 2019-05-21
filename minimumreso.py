@@ -625,8 +625,7 @@ class polony_number_resolution_minimum:
                 springpolonylist.append(self.basic_run.spring_reconstruction.reconstructed_points)
                 tuttepolonylist.append(self.basic_run.tutte_reconstruction.reconstructed_points)
                 #spring_adjusted.append(self.basic_run.spring_reconstruction.corseed_adjusted)
-                #tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted
-                )
+                #tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted )
 
 
                 np.savetxt(master_directory + '/' + '1peripheralpca_runtimes_' + title + '.txt',
