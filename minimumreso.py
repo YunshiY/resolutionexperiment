@@ -2027,7 +2027,7 @@ def multiple_align(points_repeat):
     plt.hist2d(all[:,0],all[:,1],cmap='viridis')
     return rot_two,all
 
-def draw_FWHM(dt):
+def draw_FWHM(dt,xmin,xmax):
     dt=np.array(dt)
     sns.distplot(dt,hist=False,kde_kws={'shade':True})
     dt=np.sort(dt)
@@ -2041,10 +2041,22 @@ def draw_FWHM(dt):
     hf1=kyy[p1]/2
     hf2=kyy[p2]/2
     sep=p1+argrelmin(kyy[p1,p2])
-    valuehf1_1=np.argmin(kyy[0:p1]-hf1)
-    valuehf1_2=np.argmin(kyy[p1:sep]-hf1)+p1
-    valuehf2_1=np.argmin(kyy[sep:p2]-hf2)+sep
-    valuehf2_2=np.argmin(kyy[p2:len(dt)]-hf2)+p2
+    vhf1=find_half_kernel(hf1,kernel,xmin,dt[p1],steps=1000)
+    vhf2=find_half_kernel(hf1,kernel,dt[p1],dt[sep],steps=1000)
+    vhf3=find_half_kernel(hf2,kernel,dt[sep],dt[p2],steps=1000)
+    vhf4=find_half_kernel(hf2,kernel,dt[p2],xmax,steps=1000)
+    fwhm1=vhf2-vhf1
+    fwhm2=vhf4-vhf3
+    sns.distplot(dt,kde_kws={'shade':True},hist=False)
+    use_this_color=sns.color_palette('deep')[0]
+    plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+    plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+    plt.vlines(x=vhf3,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+    plt.vlines(x=vhf4,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+    plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
+    plt.text(x=vhf3,y=1.2,s='%s'%fwhm2)
+    plt.savefig('fwhm.png')
+
 
 
 
