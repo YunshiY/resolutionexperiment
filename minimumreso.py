@@ -525,7 +525,7 @@ class just_generate_data:
                                                                untethered_graph=self.basic_circle.untethered_graph,
                                                                rgb_stamp_catalog=self.basic_circle.rgb_stamp_catalog)
         self.spring_reconstruction.conduct_spring_embedding(full_output=full_output, image_only=False)
-        self.spring_reconstruction.align(full_output=False)
+        #self.spring_reconstruction.align(full_output=False)
         self.tutte_reconstruction=parsift_lib.Reconstruction(self.basic_circle.directory_name,
                                                                corseed=self.basic_circle.corseed,
                                                                ideal_graph=self.basic_circle.ideal_graph,
@@ -533,7 +533,7 @@ class just_generate_data:
                                                                rgb_stamp_catalog=self.basic_circle.rgb_stamp_catalog)
 
         self.tutte_reconstruction.conduct_tutte_embedding(full_output=full_output,image_only=False)
-        self.tutte_reconstruction.align(full_output=False)
+        #self.tutte_reconstruction.align(full_output=False)
 
 
 
@@ -624,8 +624,8 @@ class polony_number_resolution_minimum:
                 # ipdb.set_trace()
                 springpolonylist.append(self.basic_run.spring_reconstruction.reconstructed_points)
                 tuttepolonylist.append(self.basic_run.tutte_reconstruction.reconstructed_points)
-                spring_adjusted.append(self.basic_run.spring_reconstruction.corseed_adjusted)
-                tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted
+                #spring_adjusted.append(self.basic_run.spring_reconstruction.corseed_adjusted)
+                #tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted
                 )
 
 
@@ -669,8 +669,8 @@ class polony_number_resolution_minimum:
         self.spring_cross=cross_spring_centroid
         self.sitelist=sitelist
         self.seedlist=seedlist
-        self.tutte_adjusted_seed=tutte_adjusted
-        self.spring_adjusted_seed=spring_adjusted
+        #self.tutte_adjusted_seed=tutte_adjusted
+        #self.spring_adjusted_seed=spring_adjusted
         self.simulationerror=simulationerror
 
     def plot_in_3d(self):
