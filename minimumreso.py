@@ -622,8 +622,8 @@ class polony_number_resolution_minimum:
                 cross_tutte_centroid[i]=crosspol.tutte_centroid_error()[1]
                 cross_spring_centroid[i]=crosspol.spr_centroid_error()[1]
                 # ipdb.set_trace()
-                springponolylist.append(self.basic_run.spring_reconstruction.reconstructed_points)
-                tutteponolylist.append(self.basic_run.tutte_reconstruction.reconstructed_points)
+                springpolonylist.append(self.basic_run.spring_reconstruction.reconstructed_points)
+                tuttepolonylist.append(self.basic_run.tutte_reconstruction.reconstructed_points)
                 spring_adjusted.append(self.basic_run.spring_reconstruction.corseed_adjusted)
                 tutte_adjusted.append(self.basic_run.tutte_reconstruction.corseed_adjusted
                 )
@@ -672,20 +672,6 @@ class polony_number_resolution_minimum:
         self.tutte_adjusted_seed=tutte_adjusted
         self.spring_adjusted_seed=spring_adjusted
         self.simulationerror=simulationerror
-        timeout = 3
-        print 'cd to ' + master_directory + '? (Y/n)'
-        rlist, _, _ = select([sys.stdin], [], [], timeout)
-        if rlist:
-            cd_query = sys.stdin.readline()
-            # ipdb.set_trace()
-            print 'changing directories... use: "os.system("xdg-open nameoffile.png")" to view a file within shell'
-            if cd_query == 'y\n' or cd_query == 'yes\n' or cd_query == 'Y\n' or cd_query == 'YES\n' or cd_query == 'Yes\n' or cd_query == '\n':
-                os.chdir(master_directory)
-            else:
-                print 'no cd'
-        else:
-            print 'changing directories... use: "os.system("xdg-open nameoffile.png")" to view a file within shell'
-            os.chdir(master_directory)
 
     def plot_in_3d(self):
             dspring = zip(self.polony_counts, self.tutte_centroid)
@@ -771,7 +757,6 @@ def kernel_error(reconstructed_spots,fixedspor,npoints,nexp,nrepeat):
 
         plt.savefig('error_kernel' + '%s' % i + '.png')
 
-        ipdb.set_trace()
 
 
 
@@ -1952,7 +1937,7 @@ def draw_recon(exp):
     for i in range(len(exp.springallpolony)):
         plt.scatter(exp.springallpolony[i][int(pollist[i]), 0], exp.springallpolony[i][int(pollist[i]), 1])
 
-
+#################################################
 def coarse_adjustment(exp):
     shift_vector=np.zeros((len(exp.seedlist),2))
     scale=max(exp.sitelist[0][:,0])
@@ -1987,6 +1972,7 @@ def draw_recon2points(exp,points):
                 y.append(exp.springallpolony[i][int(pollist[i]),1])
         points_repeat.append([[xx[q],yy[q] ]for q in range(len(xx))])
     plt.hist2d(x,y)
+    plt.close()
     return points_repeat
 
 
@@ -2055,8 +2041,7 @@ def draw_FWHM(dt,rmin,rmax):
     plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
     plt.text(x=vhf3,y=1.2,s='%s'%fwhm2)
     plt.savefig('fwhm.png')
-
-
+    return fwhm1,fwhm2
 
 
 
@@ -2067,3 +2052,17 @@ def find_half_kernel(halfvalue,kernel,xmin,xmax,steps=100):
     hf=np.argmin(abs(allys-halfvalue))
     hfx=allxs[hf]
     return hfx
+
+
+
+
+
+
+
+
+def repeat_experiment(sizelist):
+    exps=[]
+    for size in sizelist:
+        exp=polony_number_resolution_minimum(min=size,max=size+1,repeat=50,step=1)
+        exp.polony_number_variation_experiment()
+        exps.append(exp)
