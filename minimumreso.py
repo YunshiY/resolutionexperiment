@@ -1966,7 +1966,10 @@ def coarse_adjustment(exp):
 def draw_recon2points(exp,points):
     x = []
     y = []
+    points_repeat=[]
     for j in points:
+        xx=[]
+        yy=[]
         pollist = np.zeros((len(exp.springallpolony)))
 
         for i in range(len(exp.seedlist)):
@@ -1977,9 +1980,48 @@ def draw_recon2points(exp,points):
         for i in range(len(exp.seedlist)):
 
             if len(exp.seedlist[i])>1:
+                xx.append(exp.springallpolony[i][int(pollist[i]),0])
+                yy.append(exp.springallpolony[i][int(pollist[i]),1])
                 x.append(exp.springallpolony[i][int(pollist[i]),0])
                 y.append(exp.springallpolony[i][int(pollist[i]),1])
+        points_repeat.append([[xx[q],yy[q] ]for q in range(len(xx))])
     plt.hist2d(x,y)
+    return points_repeat
 
 
+
+def align_two_vector(v_ref,v_input):
+    x0=v_ref[0]
+    y0=v_ref[1]
+    x1=v_input[0]
+    y1=v_input[1]
+    cosine=(x0*x1+y1*y0)/(math.sqrt(x0**2+y0**2)*math.sqrt(x1**2+y1**2))
+    print v_ref,v_input,(x0*x1+y1*y0)/(math.sqrt(x0**2+y0**2)*math.sqrt(x1**2+y1**2))
+    if cosine>1:
+        cosine=1
+    theta=math.acos(cosine)
+
+    cross=x1*y0-y1*x0
+    if cross>0:
+        rot_x1=math.cos(theta)*x1-math.sin(theta)*y1
+        rot_y1=math.sin(theta)*x1+math.cos(theta)*y1
+    else:
+        rot_x1=math.cos(theta)*x1+math.sin(theta)*y1
+        rot_y1=-math.sin(theta)*x1+math.cos(theta)*y1
+    #plt.plot([0,x0],[0,y0],color='red',linewidth=2)
+    #plt.plot([0,x1],[0,y1],color='green')
+    #plt.plot([0,rot_x1],[0,rot_y1],color='blue')
+    #plt.show()
+    return [rot_x1,rot_y1]
+
+def multiple_align(points_repeat):
+    points_vector=np.array(points_repeat[1])-np.array(points_repeat[0])
+    rot_points=np.zeros((len(points_repeat[0]),2))
+    for i in range(len(points_vector)):
+        print i
+        rot_points[i]=align_two_vector(points_vector[0],points_vector[i])
+    shift_rot_points=rot_points+np.array(points_repeat[0])
+    all=np.vstack([shift_rot_points,np.array(points_repeat[0])])
+    plt.hist2d(all[:,0],all[:,1])
+    return rot_points
 
