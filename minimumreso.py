@@ -2047,7 +2047,7 @@ def draw_FWHM(dt,rmin,rmax):
     fwhm2=vhf4-vhf3
     use_this_color=sns.color_palette('deep')[0]
 
-    sns.distplot(dt,kde_kws={'shade':True},hist=False)
+    sns.distplot(dt,kde_kws={'shade':True},hist=False,color=use_this_color)
     plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
     plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
     plt.vlines(x=vhf3,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
