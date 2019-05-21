@@ -2036,8 +2036,6 @@ def draw_FWHM(dt,rmin,rmax):
     bin=len(dt)/2
     p1=argrelmax(kyy[0:bin])[0][0]
     p2=bin+argrelmax(kyy[bin:len(dt)])[0][0]
-    plt.vlines(x=dt[p1],ymin=0,ymax=1.5,colors='orange')
-    plt.vlines(x=dt[p2],ymin=0,ymax=1.5,colors='orange')
     hf1=kyy[p1]/2
     hf2=kyy[p2]/2
     sep=p1+argrelmin(kyy[p1:p2])[0][0]
@@ -2047,8 +2045,9 @@ def draw_FWHM(dt,rmin,rmax):
     vhf4=find_half_kernel(hf2,kernel,dt[p2],rmax,steps=1000)
     fwhm1=vhf2-vhf1
     fwhm2=vhf4-vhf3
-    sns.distplot(dt,kde_kws={'shade':True},hist=False)
     use_this_color=sns.color_palette('deep')[0]
+
+    sns.distplot(dt,kde_kws={'shade':True},hist=False)
     plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
     plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
     plt.vlines(x=vhf3,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
