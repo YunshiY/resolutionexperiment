@@ -2046,7 +2046,7 @@ def draw_FWHM(dt):
     valuehf2_1=np.argmin(kyy[sep:p2]-hf2)+sep
     valuehf2_2=np.argmin(kyy[p2:len(dt)]-hf2)+p2
 
-  
+
 
 
 
@@ -2054,6 +2054,7 @@ def find_half_kernel(halfvalue,kernel,xrange,steps=100):
     allxs=[xrange[0]+i*(xrange[1]-xrange[0])/steps for i in range(steps)]
     allys=kernel(allxs)
     hf=np.argmin(allys-halfvalue)
-    return hf
+    hfx=allxs[hf]
+    return hfx
 
 
