@@ -21,6 +21,7 @@ from scipy.stats import norm
 import matplotlib.mlab as mlab
 import seaborn as sns
 import pandas as pd
+from scipy.signal import argrelextrema,argrelmax,argrelmin
 
 from execute_parsift import Experiment
 import statsmodels.api as sm
@@ -2026,5 +2027,33 @@ def multiple_align(points_repeat):
     plt.hist2d(all[:,0],all[:,1],cmap='viridis')
     return rot_two,all
 
+def draw_FWHM(dt):
+    dt=np.array(dt)
+    sns.distplot(dt,hist=False,kde_kws={'shade':True})
+    dt=np.sort(dt)
+    kernel=st.gaussian_kde(dt)
+    kyy=kernel(dt)
+    bin=len(dt)
+    p1=argrelmax(kyy[0:bin])[0][0]
+    p2=bin+argrelmax(kyy[bin:len(dt)])[0][0]
+    plt.vlines(x=dt[p1],ymin=0,ymax=1.5,colors='orange')
+    plt.vlines(x=dt[p2],ymin=0,ymax=1.5,colors='orange')
+    hf1=kyy[p1]/2
+    hf2=kyy[p2]/2
+    sep=p1+argrelmin(kyy[p1,p2])
+    valuehf1_1=np.argmin(kyy[0:p1]-hf1)
+    valuehf1_2=np.argmin(kyy[p1:sep]-hf1)+p1
+    valuehf2_1=np.argmin(kyy[sep:p2]-hf2)+sep
+    valuehf2_2=np.argmin(kyy[p2:len(dt)]-hf2)+p2
+
+  
+
+
+
+def find_half_kernel(halfvalue,kernel,xrange,steps=100):
+    allxs=[xrange[0]+i*(xrange[1]-xrange[0])/steps for i in range(steps)]
+    allys=kernel(allxs)
+    hf=np.argmin(allys-halfvalue)
+    return hf
 
 
