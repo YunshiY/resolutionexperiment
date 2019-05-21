@@ -2053,6 +2053,6 @@ def draw_FWHM(dt):
 def find_half_kernel(halfvalue,kernel,xmin,xmax,steps=100):
     allxs=[xmin+i*(xmax-xmin)/steps for i in range(steps)]
     allys=kernel(allxs)
-    hf=np.argmin(allys-halfvalue)
+    hf=np.argmin(abs(allys-halfvalue))
     hfx=allxs[hf]
     return hfx
