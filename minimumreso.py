@@ -2040,7 +2040,7 @@ def draw_FWHM(dt,xmin,xmax):
     plt.vlines(x=dt[p2],ymin=0,ymax=1.5,colors='orange')
     hf1=kyy[p1]/2
     hf2=kyy[p2]/2
-    sep=p1+argrelmin(kyy[p1,p2])
+    sep=p1+argrelmin(kyy[p1:p2])
     vhf1=find_half_kernel(hf1,kernel,xmin,dt[p1],steps=1000)
     vhf2=find_half_kernel(hf1,kernel,dt[p1],dt[sep],steps=1000)
     vhf3=find_half_kernel(hf2,kernel,dt[sep],dt[p2],steps=1000)
