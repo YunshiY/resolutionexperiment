@@ -2022,6 +2022,6 @@ def multiple_align(points_repeat):
         rot_points[i]=align_two_vector(points_vector[0],points_vector[i])
     shift_rot_points=rot_points+np.array(points_repeat[0])
     all=np.vstack([shift_rot_points,np.array(points_repeat[0])])
-    plt.hist2d(all[:,0],all[:,1])
+    plt.hist2d(all[:,0],all[:,1],cmap='viridis')
     return rot_points
 
