@@ -1974,7 +1974,30 @@ def draw_recon2points(exp,points):
     plt.close()
     return points_repeat
 
+def draw_recon1point(exp,point):
+    x = []
+    y = []
+    points_repeat=[]
+    xx=[]
+    yy=[]
+    pollist = np.zeros((len(exp.springallpolony)))
 
+    for i in range(len(exp.seedlist)):
+        if len(exp.seedlist[i])>1:
+            a = get_point_polony([point], exp.seedlist[i])
+            pollist[i] = int(a[0][1])
+        print pollist
+    for i in range(len(exp.seedlist)):
+
+        if len(exp.seedlist[i])>1:
+            xx.append(exp.springallpolony[i][int(pollist[i]),0])
+            yy.append(exp.springallpolony[i][int(pollist[i]),1])
+            x.append(exp.springallpolony[i][int(pollist[i]),0])
+            y.append(exp.springallpolony[i][int(pollist[i]),1])
+    points_repeat.append([[xx[q],yy[q] ]for q in range(len(xx))])
+    plt.hist2d(x,y)
+
+    return points_repeat
 
 def align_two_vector(v_ref,v_input):
     x0=v_ref[0]
@@ -2065,3 +2088,4 @@ def repeat_experiment(sizelist):
         exp=polony_number_resolution_minimum(min=size,max=size+1,repeat=50,step=1)
         exp.polony_number_variation_experiment()
         exps.append(exp)
+    return exps
