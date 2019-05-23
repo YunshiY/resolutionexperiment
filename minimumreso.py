@@ -2070,7 +2070,7 @@ def draw_FWHM(dt,rmin,rmax,name=None):
         plt.vlines(x=vhf4,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
         plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
         plt.text(x=vhf3,y=1.2,s='%s'%fwhm2)
-        plt.savefig('fwhm'+'%s'%name'+'.png')
+        plt.savefig('fwhm'+'%s'%name+'.png')
         plt.show()
         plt.close()
         return fwhm1,fwhm2
@@ -2117,7 +2117,7 @@ def extract_all_fwhm(exp_pool):
         df=pd.DataFrame(all,columns=['x','y'])
         dt=df['y']
         try:
-            FWHM1,FWHM2=draw_FWHM(dt,-1.55,2.5,name='i')
+            FWHM1,FWHM2=draw_FWHM(dt,-1.55,2.5,name=i)
             FWHM_list.append([FWHM1,FWHM2])
         except:
             FWHM_list.append([np.nan,np.nan])
