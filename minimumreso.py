@@ -2076,7 +2076,7 @@ def draw_FWHM(dt,rmin,rmax):
         return fwhm1,fwhm2
     except:
 
-        sns.distplot(dt,kde_kws={'shade':True},hist=False,color=use_this_color)
+        sns.distplot(dt,kde_kws={'shade':True},hist=False)
         plt.savefig('cannot_find_local_maxima.png')
         plt.close()
 
