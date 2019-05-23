@@ -2065,6 +2065,9 @@ def draw_FWHM(dt,rmin,rmax,name=None):
         use_this_color=sns.color_palette('deep')[0]
 
         sns.distplot(dt,kde_kws={'shade':True},hist=False,color=use_this_color)
+        plt.vlines(x=dt[p1],ymin=0,ymax=1,color='orange')
+        plt.vlines(x=dt[p2],ymin=0,ymax=1,color='orange')
+
         plt.vlines(x=dt[sep],ymin=0,ymax=1,color='red')
         plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
         plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
