@@ -2098,8 +2098,9 @@ def extract_all_fwhm(exp_pool):
     FWHM_list=[]
     for i in range(len(exp_pool)):
         two_points.append([[0,0],[0,edge_scale[i]]])
-    for exp in exp_pool:
-        point_repeats=draw_recon2points(exp,two_points)
+    for i in range(len(exp_pool)):
+        exp=exp_pool[i]
+        point_repeats=draw_recon2points(exp,two_points[i])
         rot,all=multiple_align(point_repeats)
         df=pd.DataFrame(all,columns=['x','y'])
         dt=df['y']
