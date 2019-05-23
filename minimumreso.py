@@ -2028,7 +2028,7 @@ def multiple_align(points_repeat):
     rot_points=np.zeros((len(points_repeat[0]),2))
     for i in range(len(points_vector)):
         print i
-        rot_points[i]=align_two_vector(points_vector[0],points_vector[i])
+        rot_points[i]=align_two_vector([0,1],points_vector[i])#[0,1]can be customized for any axis you wanna align
     shift_rot_points=rot_points+np.array(points_repeat[0])
     rot_two=[shift_rot_points,points_repeat[0]]
     all=np.vstack([shift_rot_points,np.array(points_repeat[0])])
