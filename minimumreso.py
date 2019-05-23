@@ -2116,8 +2116,11 @@ def extract_all_fwhm(exp_pool):
         rot,all=multiple_align(point_repeats)
         df=pd.DataFrame(all,columns=['x','y'])
         dt=df['y']
-        FWHM1,FWHM2=draw_FWHM(dt,-1.55,0.75)
-        FWHM_list.append([FWHM1,FWHM2])
+        try:
+            FWHM1,FWHM2=draw_FWHM(dt,-1.55,0.75)
+            FWHM_list.append([FWHM1,FWHM2])
+        except:
+            FWHM_list.append([np.nan,np.nan])
     return FWHM_list
 
 
