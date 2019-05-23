@@ -2034,6 +2034,7 @@ def multiple_align(points_repeat):
     all=np.vstack([shift_rot_points,np.array(points_repeat[0])])
     try:
         plt.hist2d(np.array(all[:,0]),np.array(all[:,1]),cmap='viridis')
+        plt.show()
         plt.close()
     except:
         pass
