@@ -2063,6 +2063,7 @@ def draw_FWHM(dt,rmin,rmax):
     plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
     plt.text(x=vhf3,y=1.2,s='%s'%fwhm2)
     plt.savefig('fwhm.png')
+    plt.close()
     return fwhm1,fwhm2
 
 
@@ -2089,3 +2090,22 @@ def repeat_experiment(sizelist):
         exp.polony_number_variation_experiment()
         exps.append(exp)
     return exps
+def extract_all_fwhm(exp_pool):
+    edge_scale=np.zeros((len(exp_pool)))
+    for i in range(len(exp_pool)):
+        edge_scale[i]=max(exp_pool[i].sitelist[0][:,0])
+    two_points=[]
+    FWHM_list=[]
+    for i in range(len(exp_pool)):
+        two_points.append([[0,0],[0,edge_scale[i]]])
+    for exp in exp_pool:
+        rot,all=multiple_align(exp,two_points[i])
+        df=pd.DataFrame(all,columns=['x','y'])
+        dt=df['y']
+        FWHM1,FWHM2=draw_FWHM(dt,-1.55,0.75)
+        FWHM_list.append([FWHM1,FWHM2])
+    return FWHM_list
+
+
+
+
