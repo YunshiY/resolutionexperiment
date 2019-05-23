@@ -2117,7 +2117,7 @@ def extract_all_fwhm(exp_pool):
         df=pd.DataFrame(all,columns=['x','y'])
         dt=df['y']
         try:
-            FWHM1,FWHM2=draw_FWHM(dt,-1.55,0.75)
+            FWHM1,FWHM2=draw_FWHM(dt,-1.55,2.5)
             FWHM_list.append([FWHM1,FWHM2])
         except:
             FWHM_list.append([np.nan,np.nan])
