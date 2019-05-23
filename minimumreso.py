@@ -2032,7 +2032,7 @@ def multiple_align(points_repeat):
     shift_rot_points=rot_points+np.array(points_repeat[0])
     rot_two=[shift_rot_points,points_repeat[0]]
     all=np.vstack([shift_rot_points,np.array(points_repeat[0])])
-    plt.hist2d(np.array(all[:,0]),nop.array(all[:,1]),cmap='viridis')
+    plt.hist2d(np.array(all[:,0]),np.array(all[:,1]),cmap='viridis')
     plt.close()
     return rot_two,all
 
