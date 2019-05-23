@@ -2077,7 +2077,7 @@ def draw_FWHM(dt,rmin,rmax,name=None):
     except:
 
         sns.distplot(dt,kde_kws={'shade':True},hist=False)
-        plt.savefig('cannot_find_local_maxima.png')
+        plt.savefig('cannot_find_local_maxima'+'%s'%name+'.png')
         plt.close()
 
 
