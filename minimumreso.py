@@ -2032,8 +2032,11 @@ def multiple_align(points_repeat):
     shift_rot_points=rot_points+np.array(points_repeat[0])
     rot_two=[shift_rot_points,points_repeat[0]]
     all=np.vstack([shift_rot_points,np.array(points_repeat[0])])
-    plt.hist2d(np.array(all[:,0]),np.array(all[:,1]),cmap='viridis')
-    plt.close()
+    try:
+        plt.hist2d(np.array(all[:,0]),np.array(all[:,1]),cmap='viridis')
+        plt.close()
+    except:
+        pass
     return rot_two,all
 
 def draw_FWHM(dt,rmin,rmax):
