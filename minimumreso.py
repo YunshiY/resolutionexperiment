@@ -2043,6 +2043,7 @@ def draw_FWHM(dt,rmin,rmax):
     dt=np.array(dt)
     sns.distplot(dt,hist=False,kde_kws={'shade':True})
     dt=np.sort(dt)
+    print dt
     kernel=st.gaussian_kde(dt)
     kyy=kernel(dt)
     bin=len(dt)/2
