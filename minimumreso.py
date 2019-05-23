@@ -2054,11 +2054,11 @@ def draw_FWHM(dt,rmin,rmax,name=None):
 
         hf1=kyy[p1]/2
         hf2=kyy[p2]/2
-        sep=p1+argrelmin(kyy[p1:p2])[0][0]
+        sep=kernel_smooth_minimum(dt[p1],dt[p2],kernel)
 
         vhf1=find_half_kernel(hf1,kernel,rmin,dt[p1],steps=1000)
-        vhf2=find_half_kernel(hf1,kernel,dt[p1],dt[sep],steps=1000)
-        vhf3=find_half_kernel(hf2,kernel,dt[sep],dt[p2],steps=1000)
+        vhf2=find_half_kernel(hf1,kernel,dt[p1],sep,steps=1000)
+        vhf3=find_half_kernel(hf2,kernel,sep,dt[p2],steps=1000)
         vhf4=find_half_kernel(hf2,kernel,dt[p2],rmax,steps=1000)
         fwhm1=vhf2-vhf1
         fwhm2=vhf4-vhf3
@@ -2068,7 +2068,7 @@ def draw_FWHM(dt,rmin,rmax,name=None):
         plt.vlines(x=dt[p1],ymin=0,ymax=1,color='orange')
         plt.vlines(x=dt[p2],ymin=0,ymax=1,color='orange')
 
-        plt.vlines(x=dt[sep],ymin=0,ymax=1,color='red')
+        plt.vlines(x=sep,ymin=0,ymax=1,color='red')
         plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
         plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
         plt.vlines(x=vhf3,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
@@ -2093,7 +2093,13 @@ def find_half_kernel(halfvalue,kernel,xmin,xmax,steps=100):
     hfx=allxs[hf]
     return hfx
 
+def kernel_smooth_minimum(xmin,xmax,kernel,steps=1000):
+    allxs=[xmin+i*(xmax-xmin)/steps for i in range(steps)]
 
+    allys=kernel(allxs)
+    val=np.argmin(allys)
+    xval=allxs[val]
+    return xval
 
 
 
