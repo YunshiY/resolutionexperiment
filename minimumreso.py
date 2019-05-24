@@ -2156,7 +2156,7 @@ def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
 
 
         vhf1=find_half_kernel(hf1,kernel,rmin,dt[p1],steps=1000)
-        vhf2=find_half_kernel(hf1,kernel,dt[p1],rmin,steps=1000)
+        vhf2=find_half_kernel(hf1,kernel,dt[p1],rmax,steps=1000)
         fwhm1=vhf2-vhf1
         use_this_color=sns.color_palette('deep')[0]
 
