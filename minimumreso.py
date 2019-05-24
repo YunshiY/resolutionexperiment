@@ -2133,8 +2133,50 @@ def extract_all_fwhm(exp_pool):
             FWHM_list.append([np.nan,np.nan])
     return FWHM_list
 
+def extract_1point(exp_pool):
+    edge_scale=np.zerios(())
+    for i in range(len(exp_pool)):
+        edge_scale[i]=max(exp_pool[i].sitelist[0][:,0])
+
+    for i in range(len(exp_pool)):
+        exp=exp_pool[i]
+        point_repeats=draw_recon1point(exp,[0,0])
+        df=pd.DataFrame(np.array(point_repeats),columns=['x','y'])
+        dt=df['y']
 
 
 
 
+def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
+    dt=np.array(dt)
+    sns.distplot(dt,hist=False,kde_kws={'shade':True})
+    dt=np.sort(dt)
+    dt=dt[~np.isnan(dt)]
+    kernel=st.gaussian_kde(dt)
+    kyy=kernel(dt)
+    try:
+        p1=argrelmax(kyy[rmin,rmax])[0][0]
+
+        hf1=kyy[p1]/2
+
+
+        vhf1=find_half_kernel(hf1,kernel,rmin,dt[p1],steps=1000)
+        vhf2=find_half_kernel(hf1,kernel,dt[p1],rmin,steps=1000)
+        fwhm1=vhf2-vhf1
+        use_this_color=sns.color_palette('deep')[0]
+
+        sns.distplot(dt,kde_kws={'shade':True},hist=False,color=use_this_color)
+        plt.vlines(x=dt[p1],ymin=0,ymax=1,color='orange')
+        plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+        plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+        plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
+        plt.savefig('fwhm'+'%s'%name+'.png')
+        plt.show()
+        plt.close()
+        return fwhm1
+    except:
+
+        sns.distplot(dt,kde_kws={'shade':True},hist=False)
+        plt.savefig('cannot_find_local_maxima'+'%s'%name+'.png')
+        plt.close()
 
