@@ -2134,10 +2134,6 @@ def extract_all_fwhm(exp_pool):
     return FWHM_list
 
 def extract_1point(exp_pool):
-    edge_scale=np.zerios(())
-    for i in range(len(exp_pool)):
-        edge_scale[i]=max(exp_pool[i].sitelist[0][:,0])
-
     for i in range(len(exp_pool)):
         exp=exp_pool[i]
         point_repeats=draw_recon1point(exp,[0,0])
