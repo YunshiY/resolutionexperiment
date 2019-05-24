@@ -1974,29 +1974,7 @@ def draw_recon2points(exp,points):
     plt.close()
     return points_repeat
 
-def draw_recon1point(exp,point):
-    x = []
-    y = []
-    xx=[]
-    yy=[]
-    pollist = np.zeros((len(exp.springallpolony)))
 
-    for i in range(len(exp.seedlist)):
-        if len(exp.seedlist[i])>1:
-            a = get_point_polony([point], exp.seedlist[i])
-            pollist[i] = int(a[0][1])
-        print pollist
-    for i in range(len(exp.seedlist)):
-
-        if len(exp.seedlist[i])>1:
-            xx.append(exp.springallpolony[i][int(pollist[i]),0])
-            yy.append(exp.springallpolony[i][int(pollist[i]),1])
-            x.append(exp.springallpolony[i][int(pollist[i]),0])
-            y.append(exp.springallpolony[i][int(pollist[i]),1])
-    points_repeat=[[xx[q],yy[q] ]for q in range(len(xx))]
-    plt.hist2d(x,y)
-
-    return points_repeat
 
 def align_two_vector(v_ref,v_input):
     x0=v_ref[0]
@@ -2133,13 +2111,34 @@ def extract_all_fwhm(exp_pool):
             FWHM_list.append([np.nan,np.nan])
     return FWHM_list
 
-def extract_1point(exp_pool):
-    for i in range(len(exp_pool)):
-        exp=exp_pool[i]
-        point_repeats=draw_recon1point(exp,[0,0])
-        df=pd.DataFrame(np.array(point_repeats),columns=['x','y'])
-        dt=df['y']
-    return dt
+
+
+
+
+
+def draw_recon1point(exp,point):
+    x = []
+    y = []
+    xx=[]
+    yy=[]
+    pollist = np.zeros((len(exp.springallpolony)))
+
+    for i in range(len(exp.seedlist)):
+        if len(exp.seedlist[i])>1:
+            a = get_point_polony([point], exp.seedlist[i])
+            pollist[i] = int(a[0][1])
+        print pollist
+    for i in range(len(exp.seedlist)):
+
+        if len(exp.seedlist[i])>1:
+            xx.append(exp.springallpolony[i][int(pollist[i]),0])
+            yy.append(exp.springallpolony[i][int(pollist[i]),1])
+            x.append(exp.springallpolony[i][int(pollist[i]),0])
+            y.append(exp.springallpolony[i][int(pollist[i]),1])
+    points_repeat=[[xx[q],yy[q] ]for q in range(len(xx))]
+    plt.hist2d(x,y)
+
+    return points_repeat
 
 
 
@@ -2151,7 +2150,7 @@ def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
     kernel=st.gaussian_kde(dt)
     kyy=kernel(dt)
     try:
-        p1=argrelmax(kyy[rmin,rmax])[0][0]
+        p1=np.argmax(kyy)
 
         hf1=kyy[p1]/2
 
@@ -2166,7 +2165,7 @@ def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
         plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
         plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
         plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
-        plt.savefig('fwhm'+'%s'%name+'.png')
+        plt.savefig('fwhm_onepoint'+'%s'%name+'.png')
         plt.show()
         plt.close()
         return fwhm1
@@ -2175,4 +2174,11 @@ def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
         sns.distplot(dt,kde_kws={'shade':True},hist=False)
         plt.savefig('cannot_find_local_maxima'+'%s'%name+'.png')
         plt.close()
+
+def extract_1point(exp_pool):
+    for i in range(len(exp_pool)):
+        exp = exp_pool[i]
+        point_repeats = draw_recon1point(exp, [0, 0])
+        df = pd.DataFrame(np.array(point_repeats), columns=['x', 'y'])
+        dt = df['y']
 
