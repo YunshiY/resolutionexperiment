@@ -2178,12 +2178,13 @@ def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
         plt.close()
 
 def extract_1point(exp_pool):
+    fwhm_list = []
     for i in range(len(exp_pool)):
         exp = exp_pool[i]
         point_repeats = draw_recon1point(exp, [0, 0])
         df = pd.DataFrame(np.array(point_repeats), columns=['x', 'y'])
         dt = df['y']
-        fwhm_list=[]
+
         try:
             fwhm=draw_FWHM_onepoint(dt,-1.55,1.55,name=i)
             fwhm_list.append(fwhm)
