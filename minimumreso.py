@@ -2161,9 +2161,9 @@ def draw_FWHM_onepoint(dt,rmin,rmax,name=None):
         use_this_color=sns.color_palette('deep')[0]
 
         sns.distplot(dt,kde_kws={'shade':True},hist=False,color=use_this_color)
-        plt.vlines(x=dt[p1],ymin=0,ymax=1,color='orange')
-        plt.vlines(x=vhf1,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
-        plt.vlines(x=vhf2,ymin=0,ymax=1.3,linestyles=':',color=use_this_color)
+        plt.vlines(x=dt[p1],ymin=0,ymax=3,color='red')
+        plt.vlines(x=vhf1,ymin=0,ymax=3,linestyles=':',color=use_this_color)
+        plt.vlines(x=vhf2,ymin=0,ymax=3,linestyles=':',color=use_this_color)
         plt.text(x=vhf1,y=1.2,s='%s'%fwhm1)
         plt.savefig('fwhm_onepoint'+'%s'%name+'.png')
         plt.show()
@@ -2181,4 +2181,8 @@ def extract_1point(exp_pool):
         point_repeats = draw_recon1point(exp, [0, 0])
         df = pd.DataFrame(np.array(point_repeats), columns=['x', 'y'])
         dt = df['y']
+        fwhm_list=[]
+        try:
+            fwhm=draw_FWHM(dt,-1.55,1.55,name=i)
+            fwhm_list.append(fwhm)
 
