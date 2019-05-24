@@ -2186,3 +2186,7 @@ def extract_1point(exp_pool):
             fwhm=draw_FWHM(dt,-1.55,1.55,name=i)
             fwhm_list.append(fwhm)
 
+        except:
+            fwhm_list.append([np.nan,np.nan])
+    return fwhm_list
+
