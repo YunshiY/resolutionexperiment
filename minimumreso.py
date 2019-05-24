@@ -2137,6 +2137,8 @@ def draw_recon1point(exp,point):
             y.append(exp.springallpolony[i][int(pollist[i]),1])
     points_repeat=[[xx[q],yy[q] ]for q in range(len(xx))]
     plt.hist2d(x,y)
+    plt.show()
+    plt.close()
 
     return points_repeat
 
@@ -2183,7 +2185,7 @@ def extract_1point(exp_pool):
         dt = df['y']
         fwhm_list=[]
         try:
-            fwhm=draw_FWHM(dt,-1.55,1.55,name=i)
+            fwhm=draw_FWHM_onepoint(dt,-1.55,1.55,name=i)
             fwhm_list.append(fwhm)
 
         except:
