@@ -1977,7 +1977,6 @@ def draw_recon2points(exp,points):
 def draw_recon1point(exp,point):
     x = []
     y = []
-    points_repeat=[]
     xx=[]
     yy=[]
     pollist = np.zeros((len(exp.springallpolony)))
@@ -1994,7 +1993,7 @@ def draw_recon1point(exp,point):
             yy.append(exp.springallpolony[i][int(pollist[i]),1])
             x.append(exp.springallpolony[i][int(pollist[i]),0])
             y.append(exp.springallpolony[i][int(pollist[i]),1])
-    points_repeat.append([[xx[q],yy[q] ]for q in range(len(xx))])
+    points_repeat=[[xx[q],yy[q] ]for q in range(len(xx))]
     plt.hist2d(x,y)
 
     return points_repeat
@@ -2133,6 +2132,8 @@ def extract_all_fwhm(exp_pool):
         except:
             FWHM_list.append([np.nan,np.nan])
     return FWHM_list
+
+def extract_onepoint(exp_pool):
 
 
 
